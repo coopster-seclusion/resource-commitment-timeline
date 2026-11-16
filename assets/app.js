@@ -290,7 +290,7 @@
   // ---------- panel ----------
   const CARDS = [
     { k: "personnel", label: "Personnel" }, { k: "crews", label: "Crews" }, { k: "engines", label: "Engines" },
-    { k: "helicopters", label: "Helicopters" }, { k: "tank", label: "Large airtankers flying" }];
+    { k: "helicopters", label: "Helicopters" }, { k: "tank", label: "Large airtankers flying", short: "Airtankers" }];
   // Symbols in the National Park Service map-symbol style: white pictogram on a rounded brown square, 22 x 22 glyph grid.
   // personnel, crews (guide's pointer removed), airtankers: NPS symbol library (US government work, public domain [A]);
   // helicopters: Mapbox Maki "heliport" (CC0), scaled from its 15 grid; engines: drawn here in the NPS manner (no
@@ -310,7 +310,7 @@
   let sparks = {};
   function cardsInit() {
     $("cards").innerHTML = CARDS.map(c => `<div class="card" id="c-${c.k}">
-      <div class="card-top"><span class="k">${sym(c.k)}${c.label}</span><span class="v" id="v-${c.k}">-</span></div>
+      <div class="card-top"><span class="k">${sym(c.k)}<span class="lf">${c.label}</span><span class="ls">${c.short || c.label}</span></span><span class="v" id="v-${c.k}">-</span></div>
       <div class="d" id="d-${c.k}">&nbsp;</div>
       <canvas id="s-${c.k}" role="img" aria-label="${c.label}, 2007 to 2025"></canvas>
       ${c.k === "tank" ? '<div class="note" id="n-tank"></div>' : ""}</div>`).join("");
@@ -596,6 +596,12 @@
       await loadYear(yOf[i]); if (opts.scope) { scope = opts.scope; baseKey = ""; buildSparks(); }
       PRESENT_STEP = !!opts.trail; setIdx(i); PRESENT_STEP = false; return i;
     },
-    setMode, setScope
+    setMode, setScope,
+    caption(c, alpha = 1) {   // c: {t, s, u, big} or null; alpha 0..1, set per frame by the capture script
+      const el = $("cap"); if (!c || alpha <= 0) { el.innerHTML = ""; el.className = ""; el.style.opacity = 0; return; }
+      el.className = c.big ? "big" : ""; el.style.opacity = alpha;
+      el.innerHTML = `<div class="box"><div class="t">${c.t || ""}</div>${c.s ? `<div class="s">${c.s}</div>` : ""}${c.u ? `<div class="u">${c.u}</div>` : ""}</div>`;
+    },
+    get ready() { return Object.values(reliefs).every(R => R.levels.some(L => L.img)) && !!rows(idx); }
   };
 })();

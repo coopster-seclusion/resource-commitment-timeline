@@ -1,0 +1,9 @@
+{
+  "name": "timeline-video-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "puppeteer-core": "^23.11.1"
+  }
+}
