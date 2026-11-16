@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'">
+<title>Resource Commitment Timeline</title>
+<meta name="description" content="Nineteen years of US wildfire strain, 2007 to 2025: every NICC situation report, with preparedness levels, committed firefighting resources and the incidents behind them.">
+<meta property="og:title" content="Resource Commitment Timeline: toward a better measure of wildfire strain">
+<meta property="og:url" content="https://coopster-seclusion.github.io/resource-commitment-timeline/">
+<meta property="og:image" content="https://coopster-seclusion.github.io/resource-commitment-timeline/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:description" content="Every NICC situation report from 2007 to 2025 on one map: preparedness levels, committed resources and the incidents behind them.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1015'/%3E%3Cpath d='M16 5c2 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 3-6 0 3 1 4 2 4 0-4 0-7 2-11z' fill='%23ef7a22'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="preload" href="data/core.json" as="fetch" crossorigin>
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Resources for the selected day">
+    <div class="rail-head">
+      <div class="toprow">
+        <div class="eyebrow">US wildfire &middot; 2007 to 2025</div>
+        <div class="tools">
+          <button class="iconbtn" id="theme" type="button" aria-label="Colour theme: automatic" title="Theme"></button>
+          <button class="iconbtn" id="aboutbtn" type="button" aria-haspopup="dialog" title="About the data">i</button>
+        </div>
+      </div>
+      <h1>Resource Commitment Timeline</h1>
+      <p class="subtitle">Toward a better measure of wildfire strain</p>
+      <div class="daterow">
+        <div class="date" id="date" aria-live="polite">Loading<small id="dategap">&nbsp;</small></div>
+        <div class="natpl"><span class="lbl">National PL</span><div class="plchip" id="natpl">-</div></div>
+      </div>
+      <div class="scope" id="scope"><span>Showing</span> <b id="scopename">National</b></div>
+    </div>
+    <div class="rail-body">
+      <div id="cards" class="cards"></div>
+      <div class="sec" id="inctitle">Largest incidents that day</div>
+      <ul class="inc" id="inclist"></ul>
+      <div class="sec">Areas on this day</div>
+      <table class="areas" id="areas">
+        <thead><tr><th scope="col">Area</th><th scope="col">PL</th><th scope="col" class="num">Personnel</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="foot"><button class="linkbtn" id="aboutlink" type="button">About the data, sources and caveats</button></p>
+    </div>
+  </aside>
+  <main class="stage">
+    <div class="mapwrap" id="mapwrap">
+      <canvas id="map" role="img" aria-label="Map of US geographic areas coloured by preparedness level, with heat where incidents had committed personnel"></canvas>
+      <div class="pills" role="group" aria-label="Map layer">
+        <button type="button" id="m-heat" aria-pressed="true">Heat</button>
+        <button type="button" id="m-pts" aria-pressed="false">Points</button>
+        <button type="button" id="m-pl" aria-pressed="false">PL only</button>
+      </div>
+      <div class="callout" id="callout" hidden aria-live="polite"></div>
+      <div class="legend" aria-hidden="true">
+        <div class="t">Area preparedness level</div>
+        <div class="row" id="legpl"></div>
+        <div class="t">Committed personnel</div>
+        <div class="row"><span>fewer</span><canvas class="ramp" id="legheat" width="120" height="10"></canvas><span>more</span></div>
+      </div>
+      <div class="yearload" id="yearload" hidden></div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="loading" id="loading">Loading 3,942 reports</div>
+    </div>
+    <div class="scrub">
+      <button class="btn" id="play" type="button" aria-label="Play">&#9654;</button>
+      <select id="speed" aria-label="Playback speed">
+        <option value="3">3 / s</option><option value="8" selected>8 / s</option><option value="20">20 / s</option><option value="45">45 / s</option>
+      </select>
+      <div class="track">
+        <canvas id="trackc"></canvas>
+        <input type="range" id="slider" min="0" max="1" value="0" step="1" aria-label="Report date">
+        <div id="thumb"></div>
+        <div id="years"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<dialog id="about" aria-labelledby="about-h">
+  <div class="dlg">
+    <div class="dlg-head"><h2 id="about-h">About the data</h2><button class="iconbtn" id="aboutclose" type="button" aria-label="Close">&times;</button></div>
+    <div class="dlg-body">
+      <h3>What you are looking at</h3>
+      <p>Each step is one National Interagency Coordination Center (NICC) Incident Management Situation Report, 3,942 of them from 2007 to 2025. Reports are daily in the fire season and weekly off season, so the timeline steps by report, not by day.</p>
+      <p><b>Area colour</b> is each Geographic Area's preparedness level (PL, 1 to 5) printed in that report. Reports often leave a quiet area's PL out; those areas show as "not listed", not as PL 1. Great Basin is one area here; before January 2015 its PL is the higher of East and West Basin.</p>
+      <p><b>Heat</b> places each incident listed in the report at one point, weighted by its committed personnel. A large complex shows as a single point, not its perimeter. About 1% of incident-days have no point and are not drawn. During playback, heat cools over a few reports so you can see where activity has just been.</p>
+      <p><b>Personnel, crews, engines and helicopters</b> are resources committed to the incidents listed in the report, summed by reporting area. They measure commitment, not shortage or total need.</p>
+      <p><b>Large airtankers flying</b> are federal exclusive-use large airtankers that flew that calendar day, from invoice records. The situation report stopped printing committed airtankers in May 2007, so this is activity, not commitment, and has no area breakdown.</p>
+      <p><b>Callouts</b> are made from the same data: each year's busiest report by committed personnel, and the first report each year at National PL 5.</p>
+      <h3>Sources</h3>
+      <ul>
+        <li>NICC Incident Management Situation Reports, 2007 to 2025, parsed by the author.</li>
+        <li>Incident points: NIFC incident locations, matched to report incidents by the author.</li>
+        <li>Airtankers: USDA Forest Service FAM Aviation Business System public reports.</li>
+        <li>Geographic Area and Predictive Service Area boundaries: NIFC.</li>
+        <li>Shaded relief: computed by the author from Terrain Tiles on AWS Open Data (Mapzen; sources include SRTM, GMTED2010, NED and ETOPO1; <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" rel="noopener">full attribution</a>).</li>
+        <li>Built with d3 (ISC licence); symbols in the National Park Service map-symbol style, from the NPS symbol library (public domain) and Mapbox Maki (CC0), engine drawn by the author; fonts Barlow Semi Condensed, Inter and JetBrains Mono (SIL Open Font Licence).</li>
+      </ul>
+      <h3>Caveats</h3>
+      <p>Counts are as printed in the reports; obvious report errors are logged, not corrected. This is research in progress for a master's thesis (MGSD) at the University of Canterbury, not an operational product.</p>
+      <p class="ver" id="ver"></p>
+    </div>
+  </div>
+</dialog>
+<noscript><p class="noscript">This page needs JavaScript to draw the map.</p></noscript>
+<script src="vendor/d3-7.8.5.min.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
