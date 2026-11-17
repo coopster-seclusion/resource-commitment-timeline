@@ -27,7 +27,7 @@ const S = [
   { from: "2008-06-20", to: "2008-07-20", speed: .5, cap: { t: "June 2008: 998 fires in 12 days", s: "Northern California, 20 Jun to 1 Jul. National Preparedness Level 5 by 1 Jul." } },
   { from: "2008-07-21", to: "2020-07-31", speed: 5, cap: { t: "Every summer, commitment builds in the West", s: "Each step is one report: daily in the fire season, weekly off season." }, capFrames: 110 },
   { from: "2020-08-01", to: "2020-09-30", speed: .5, cap: { t: "2020: the record", s: "National PL 5 from 19 Aug. 31,490 personnel committed on 19 Sep." } },
-  { from: "2020-10-01", to: "2025-12-31", speed: 5, cap: { t: "2021 to 2025", s: "Busiest reports: 27,844 personnel (14 Aug 2021) and 27,755 (3 Aug 2024)." }, capFrames: 120 },
+  { from: "2020-10-01", to: "2025-12-31", speed: 5, cap: { t: "2021 to 2025", s: "Busiest reports: 26,476 personnel (26 Aug 2021) and 27,755 (3 Aug 2024)." }, capFrames: 120 },
   { hold: "2025-12-31", frames: 110, cap: { big: true, t: "Resource Commitment Timeline", s: "Toward a better measure of wildfire strain. Explore every report yourself:", u: SITE } },
 ];
 const FADE = 9;
