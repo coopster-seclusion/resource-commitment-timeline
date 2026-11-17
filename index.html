@@ -40,6 +40,7 @@
     </div>
     <div class="rail-body">
       <div id="cards" class="cards"></div>
+      <div id="intlwrap" hidden><div class="sec">International help</div><ul class="intl" id="intllist"></ul></div>
       <div class="sec" id="inctitle">Largest incidents that day</div>
       <ul class="inc" id="inclist"></ul>
       <div class="sec">Areas on this day</div>
@@ -59,6 +60,7 @@
         <button type="button" id="m-pl" aria-pressed="false">PL only</button>
       </div>
       <div class="callout" id="callout" hidden aria-live="polite"></div>
+      <div id="intlmap" aria-hidden="true"></div>
       <div id="cap" aria-hidden="true"></div>
       <div class="legend" aria-hidden="true">
         <div class="t">Area preparedness level</div>
@@ -96,9 +98,11 @@
       <p><b>Personnel, crews, engines and helicopters</b> are resources committed to the incidents listed in the report, summed by reporting area. They measure commitment, not shortage or total need.</p>
       <p><b>Large airtankers flying</b> are federal exclusive-use large airtankers that flew that calendar day, from invoice records. The situation report stopped printing committed airtankers in May 2007, so this is activity, not commitment, and has no area breakdown.</p>
       <p><b>Callouts</b> are made from the same data: each year's busiest report by committed personnel, and the first report each year at National PL 5.</p>
+      <p><b>International help</b> (flags on the map and in the panel, a line under the timeline) shows crews, personnel and aircraft from Australia, New Zealand, Canada and Mexico on US fires, as printed in the situation report's daily note (2008 on). The report prints no note for 2011 to 2014; those dates come from the NICC annual reports. Counts are as printed; "about N people" adds 20 per crew, the crew size the 2013 annual report gives for Canadian crews (an assumption for other crews). The annual reports sometimes give other totals or a later release date than the daily note; both are logged, not corrected.</p>
       <h3>Sources</h3>
       <ul>
         <li>NICC Incident Management Situation Reports, 2007 to 2025, parsed by the author.</li>
+        <li>International help: situation report notes and NICC annual reports (2011 to 2014), compiled by the author. Flags drawn by the author.</li>
         <li>Incident points: NIFC incident locations, matched to report incidents by the author.</li>
         <li>Airtankers: USDA Forest Service FAM Aviation Business System public reports.</li>
         <li>Geographic Area and Predictive Service Area boundaries: NIFC.</li>

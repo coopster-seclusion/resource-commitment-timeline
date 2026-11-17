@@ -192,3 +192,17 @@ body.present { overflow: hidden; }
 #cap.big .t { font-size: 52px; color: #fff; }
 #cap.big .s { font-size: 20px; color: #d9dbe3; margin-top: 14px; }
 #cap.big .u { font: 500 17px/1.4 var(--f-mono); color: var(--cursor); margin-top: 22px; }
+/* International help (thesis D-228) */
+.flag { width: 24px; height: 12px; border-radius: 2px; display: inline-block; vertical-align: -1px; box-shadow: 0 0 0 1px var(--line); flex: none; }
+.intl { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.intl li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start; padding: 7px 8px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); }
+.intl .fl { display: flex; gap: 3px; padding-top: 2px; }
+.intl .tx b { font-weight: 600; font-size: 13px; display: block; }
+.intl .sub { font: 400 11px/1.35 var(--f-mono); color: var(--muted); display: block; margin-top: 2px; }
+#intlmap { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+#intlmap .ib { position: absolute; transform: translateX(-50%); display: flex; gap: 3px; align-items: center; padding: 3px 5px; border-radius: 6px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); font: 700 11px/1 var(--f-display); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+#intlmap .ib .flag { width: 20px; height: 10px; }
+#intlmap .ib span { margin-left: 2px; }
+.callout .ct.ci { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 17px; }
+.callout .ct.ci .flag { width: 28px; height: 14px; }
+.present #intlmap { display: none; }

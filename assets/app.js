@@ -111,7 +111,7 @@
     years.forEach(projectYear);
     shadow.width = Math.ceil(W / 2); shadow.height = Math.ceil(H / 2);
     heatc.width = glowc.width = shadow.width; heatc.height = glowc.height = shadow.height;
-    trail = null; buildBase(); layoutTrack(); buildSparks(); draw();
+    trail = null; buildBase(); layoutTrack(); buildSparks(); draw(); if (D) intlPanel();
   }
 
   // Shaded relief: one hillshade image per albersUsa part, rendered offline in that part's own Albers projection,
@@ -266,6 +266,56 @@
   }
   let PRESENT_STEP = false;
 
+  // ---------- international help (thesis D-228) ----------
+  // Flags drawn here at 40 x 20 from each flag's published construction (no image files: the page's CSP allows only
+  // its own origin). Union Jack after the standard 60 x 30 construction; star positions approximate at this size.
+  let flagN = 0;
+  const FNAME = { AU: "Australia", NZ: "New Zealand", CA: "Canada", MX: "Mexico" };
+  const star = (cx, cy, r, n = 7, k = .42) => Array.from({ length: 2 * n }, (_, j) => {
+    const a = -Math.PI / 2 + j * Math.PI / n, rr = j % 2 ? r * k : r; return `${(cx + rr * Math.cos(a)).toFixed(2)},${(cy + rr * Math.sin(a)).toFixed(2)}`; }).join(" ");
+  const UJ = (id) => `<g transform="scale(.33333)"><clipPath id="${id}"><path d="M30,15h30v15zv15h-30zh-30v-15zv-15h30z"/></clipPath>`
+    + `<path d="M0,0v30h60v-30z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/>`
+    + `<path d="M0,0L60,30M60,0L0,30" clip-path="url(#${id})" stroke="#C8102E" stroke-width="4"/>`
+    + `<path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g>`;
+  const LEAF = [[0,-1],[.11,-.8],[.3,-.9],[.24,-.42],[.5,-.64],[.57,-.5],[.84,-.56],[.76,-.3],[.9,-.22],[.46,.18],[.52,.34],[.04,.28],[.04,.8]];
+  const leaf = (cx, cy, s) => [...LEAF, ...LEAF.slice(1).reverse().map(([x, y]) => [-x, y])]
+    .map(([x, y]) => `${(cx + x * s).toFixed(2)},${(cy + y * s).toFixed(2)}`).join(" ");
+  function flag(code) {
+    const id = "uj" + (++flagN);
+    const body = {
+      AU: `<rect width="40" height="20" fill="#012169"/>${UJ(id)}<g fill="#fff"><polygon points="${star(10, 15, 3)}"/>`
+        + `<polygon points="${star(30, 3.4, 1.5)}"/><polygon points="${star(30, 16.6, 1.6)}"/><polygon points="${star(25.3, 8.8, 1.5)}"/>`
+        + `<polygon points="${star(34.4, 7.7, 1.3)}"/><polygon points="${star(32.1, 10.8, .8, 5, .4)}"/></g>`,
+      NZ: `<rect width="40" height="20" fill="#00247D"/>${UJ(id)}<g fill="#CC142B" stroke="#fff" stroke-width=".4">`
+        + `<polygon points="${star(30, 4.6, 1.5, 5, .38)}"/><polygon points="${star(25.6, 9.6, 1.4, 5, .38)}"/>`
+        + `<polygon points="${star(34, 8.6, 1.25, 5, .38)}"/><polygon points="${star(30, 16.2, 1.7, 5, .38)}"/></g>`,
+      CA: `<rect width="40" height="20" fill="#fff"/><rect width="10" height="20" fill="#D80621"/><rect x="30" width="10" height="20" fill="#D80621"/>`
+        + `<polygon points="${leaf(20, 10.7, 6.6)}" fill="#D80621"/>`,
+      MX: `<rect width="13.34" height="20" fill="#006847"/><rect x="13.33" width="13.34" height="20" fill="#fff"/><rect x="26.66" width="13.34" height="20" fill="#CE1126"/>`
+        + `<ellipse cx="20" cy="9.2" rx="2.2" ry="2.7" fill="#8C5A2B"/><path d="M16.6,11.2Q20,15.4 23.4,11.2" stroke="#2E7D32" stroke-width="1.1" fill="none"/>`
+    }[code] || "";
+    return `<svg class="flag" viewBox="0 0 40 20" role="img" aria-label="${FNAME[code] || code}"><title>${FNAME[code] || code}</title>${body}</svg>`;
+  }
+  const flags = (p) => p.map(flag).join("");
+  const provNames = (p) => { const n = p.map(c => FNAME[c] || c); return n.length < 2 ? n[0] : n.slice(0, -1).join(", ") + " and " + n[n.length - 1]; };
+  const people = (s) => s.people && /crew/.test(s.what) ? s.people : null;
+  const destName = (g) => g[0] === "US" ? "national support" : g.map(x => GNAME[x] || x).join(" and ");
+  const activeIntl = () => (D.intl || []).filter(s => s.a <= idx && idx <= s.b);
+  function intlPanel() {
+    const act = activeIntl();
+    $("intlwrap").hidden = !act.length;
+    $("intllist").innerHTML = act.map(s => `<li><span class="fl">${flags(s.p)}</span><span class="tx"><b>${esc(s.what)}</b>`
+      + `<span class="sub">From ${provNames(s.p)} &middot; ${destName(s.g)}${people(s) ? ` &middot; about ${fmt(people(s))} people` : ""}</span></span></li>`).join("");
+    const box = $("intlmap"); let html = "";
+    const byG = {};
+    act.forEach(s => s.g.forEach(g => { if (gcent[g]) (byG[g] = byG[g] || []).push(s); }));
+    Object.entries(byG).forEach(([g, ss]) => {
+      const c = gcent[g], p = [...new Set(ss.flatMap(s => s.p))], n = ss.reduce((t, s) => t + (s.g.length === 1 ? s.people || 0 : 0), 0);
+      html += `<div class="ib" style="left:${c[0].toFixed(1)}px;top:${(c[1] + (W < 600 ? 9 : 11)).toFixed(1)}px">${flags(p)}${n ? `<span>${fmt(n)}</span>` : ""}</div>`;
+    });
+    box.innerHTML = html;
+  }
+
   // ---------- callouts ----------
   const CALLOUT_DAYS = 9;
   function activeCallout() {
@@ -279,7 +329,10 @@
     if (c === shownCallout) return; shownCallout = c;
     if (!c) { el.classList.remove("on"); setTimeout(() => { if (!shownCallout) el.hidden = true; }, 360); return; }
     const y = c.date.slice(0, 4);
-    el.innerHTML = c.kind === "peak"
+    el.innerHTML = c.kind === "intl"
+      ? `<div class="ce">${y} &middot; International help arrives</div><div class="ct ci">${flags(c.p)}<span>${esc(c.what)}</span></div>
+         <div class="cb">From ${provNames(c.p)} to ${destName(c.g)}, ${shortDate(c.date)}.${people(c) ? ` About ${fmt(people(c))} people.` : ""} Source: ${c.src === "IMSR" ? "NICC situation report" : esc(c.src)}.</div>`
+      : c.kind === "peak"
       ? `<div class="ce">${y} &middot; busiest report of the year</div><div class="ct">${fmt(c.personnel)} personnel committed</div>
          <div class="cb">${shortDate(c.date)}. Largest incident: <b>${esc(c.top)}</b>${c.gacc ? ` (${GNAME[c.gacc] || c.gacc})` : ""}, ${fmt(c.top_personnel)} personnel.</div>`
       : `<div class="ce">${y} &middot; National PL 5</div><div class="ct">Top preparedness level</div>
@@ -412,6 +465,7 @@
     let clr = $("clearscope");
     if (scope !== "NATIONAL" && !clr) { $("scope").insertAdjacentHTML("beforeend", '<button class="btn" id="clearscope" type="button">National</button>'); $("clearscope").onclick = () => setScope("NATIONAL"); }
     if (scope === "NATIONAL" && clr) clr.remove();
+    intlPanel();
     calloutPanel();
   }
   function gapNote() {
@@ -442,6 +496,7 @@
     }
     g.fillStyle = colors["--ink2"];
     D.callouts.forEach(c => { if (c.kind !== "peak") return; const x = dayX(c.i, w); g.beginPath(); g.moveTo(x - 3, 0); g.lineTo(x + 3, 0); g.lineTo(x, 4); g.closePath(); g.fill(); });
+    g.fillStyle = colors["--cursor"]; (D.intl || []).forEach(s => { const x0 = dayX(s.a, w), x1 = Math.max(x0 + 1.5, dayX(s.b, w)); g.fillRect(x0, h - 2, x1 - x0, 2); });
     const yrs = $("years"); let html = "";
     const step = w < 500 ? 3 : w < 900 ? 2 : 1;
     for (let y = 2007; y <= 2025; y++) { const f = (Date.UTC(y, 0, 1) / 864e5 - T0) / (T1 - T0); if ((y - 2007) % step === 0) html += `<span style="left:${(f * 100).toFixed(2)}%">${y}</span>`; }
