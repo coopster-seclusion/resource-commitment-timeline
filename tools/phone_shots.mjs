@@ -1,7 +1,7 @@
 // Phone screenshots for release checks (thesis D-241): each size at the top of the page and scrolled so the map
 // is pinned, with a callout showing. Needs the site served locally (python -m http.server 8737 from the repo root)
 // and the headless browser that capture.mjs uses.
-// Usage: node phone_shots.mjs <out_dir> [date]      (default date 2007-07-28: a National PL 5 callout is up)
+// Usage: [SITE=<url>] node phone_shots.mjs <out_dir> [date]      (default date 2007-07-28: a National PL 5 callout is up)
 // Writes <out_dir>/<w>x<h>_top.png and <w>x<h>_pinned.png, and prints overlap measurements.
 import fs from "node:fs";
 import path from "node:path";
@@ -12,6 +12,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const BROWSER = "out/browsers/chrome-headless-shell/win64-131.0.6778.204/chrome-headless-shell-win64/chrome-headless-shell.exe";
 const out = process.argv[2] || path.join(here, "out", "phone");
 const date = process.argv[3] || "2007-07-28";
+const SITE = process.env.SITE || "http://localhost:8737/";   // SITE=https://.../ checks the live site
 const SIZES = [[375, 667], [375, 553], [320, 568], [360, 640], [375, 812], [414, 896]];
 fs.mkdirSync(out, { recursive: true });
 const browser = await puppeteer.launch({ executablePath: path.join(here, BROWSER), headless: "shell",
@@ -19,7 +20,7 @@ const browser = await puppeteer.launch({ executablePath: path.join(here, BROWSER
 for (const [w, h] of SIZES) {
   const page = await browser.newPage();
   await page.setViewport({ width: w, height: h, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  await page.goto(`http://localhost:8737/?theme=dark#${date}`, { waitUntil: "networkidle0" });
+  await page.goto(`${SITE}?theme=dark&r=${Date.now()}#${date}`, { waitUntil: "networkidle0" });
   await page.waitForFunction(() => window.strainTimeline && window.strainTimeline.ready, { timeout: 30000 });
   await new Promise(r => setTimeout(r, 1200));
   await page.screenshot({ path: path.join(out, `${w}x${h}_top.png`) });

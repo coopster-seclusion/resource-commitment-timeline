@@ -28,7 +28,7 @@ Checklist for the owner. Nothing here is published yet.
 ## Each release
 
 - Bump `RELEASE` in `assets/app.js` (shown in About) and the `?v=` on the CSS and JS links in `index.html`. `stats.js` takes the same `?v=` as app.js, so it needs no separate bump.
-- Run `node tools/phone_shots.mjs <out_dir>` (site served locally): screenshots and gap measurements at 375x667, 375x553 (iPhone SE in Safari), 320x568, 360x640, 375x812 and 414x896, top and pinned. On short-screen sizes every gap must be 0 or more. Then check desktop, dark and light.
+- Run `node tools/phone_shots.mjs <out_dir>` (site served locally): screenshots and gap measurements at 375x667, 375x553 (iPhone SE in Safari), 320x568, 360x640, 375x812 and 414x896, top and pinned. On short-screen sizes every gap must be 0 or more. Then check desktop, dark and light. After the push, rerun it on the live site: `SITE=https://coopster-seclusion.github.io/resource-commitment-timeline/ node tools/phone_shots.mjs <out_dir>`.
 - After visual changes, `node tools/preview.mjs` (site served locally) to redo `preview.png`.
 
 ## Each data update
