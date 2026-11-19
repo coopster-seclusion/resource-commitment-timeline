@@ -281,3 +281,9 @@ body.present { overflow: hidden; }
   .inc li { height: 50px; align-content: center; }   /* every row the same height, so the list never jumps */
   .inc li.slot { cursor: default; }
 }
+/* v2.5: map key at the top of About (the map legend is hidden on phones) */
+.keybox { display: grid; gap: 8px; margin: 12px 0 4px; padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; font-size: 11px; color: var(--ink2); justify-self: start; width: fit-content; max-width: 100%; }
+.keybox .t { font: 600 10px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.keybox .row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.keybox .sw { width: 18px; height: 12px; border-radius: 3px; display: grid; place-items: center; font: 600 9px/1 var(--f-display); color: #fff; }
+.keybox .ramp { width: 120px; height: 10px; border-radius: 3px; }

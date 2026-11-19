@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.4", date: "2026-11-19" };   // bump on each published change
+  const RELEASE = { v: "2.5", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -40,10 +40,12 @@
     const gr = c.createLinearGradient(0, 0, 256, 0);
     ["--heat0","--heat1","--heat2","--heat3","--heat4"].forEach((k, i) => gr.addColorStop(i / 4, colors[k]));
     c.fillStyle = gr; c.fillRect(0, 0, 256, 1); lut = c.getImageData(0, 0, 256, 1).data;
-    const lh = $("legheat").getContext("2d"); const lg = lh.createLinearGradient(0, 0, 120, 0);
-    ["--heat0","--heat1","--heat2","--heat3","--heat4"].forEach((k, i) => lg.addColorStop(i / 4, colors[k]));
-    lh.clearRect(0, 0, 120, 10); lh.fillStyle = lg; lh.fillRect(0, 0, 120, 10);
-    $("legpl").innerHTML = [1,2,3,4,5].map(p => `<span class="sw" style="background:${colors["--pl" + p]}">${p}</span>`).join("")
+    ["legheat", "legheat2"].forEach(id => {   // the map legend and the copy at the top of About
+      const lh = $(id).getContext("2d"), lg = lh.createLinearGradient(0, 0, 120, 0);
+      ["--heat0","--heat1","--heat2","--heat3","--heat4"].forEach((k, i) => lg.addColorStop(i / 4, colors[k]));
+      lh.clearRect(0, 0, 120, 10); lh.fillStyle = lg; lh.fillRect(0, 0, 120, 10);
+    });
+    $("legpl").innerHTML = $("legpl2").innerHTML = [1,2,3,4,5].map(p => `<span class="sw" style="background:${colors["--pl" + p]}">${p}</span>`).join("")
       + `<span class="sw" style="background:${colors["--land"]};border:1px solid ${colors["--gacc-line"]}"></span><span>not listed</span>`;
   }
   const plColor = (p) => p ? colors["--pl" + p] : null;
@@ -672,7 +674,7 @@
     T0 = Date.UTC(2007, 0, 1) / 864e5; T1 = Date.UTC(2026, 0, 1) / 864e5;
     yOf = new Int16Array(N);
     D.meta.years.forEach((y, k) => { years.push({ year: y.year, i0: y.i0, i1: y.i1 }); for (let i = y.i0; i < y.i1; i++) yOf[i] = k; });
-    $("ver").textContent = `Version ${RELEASE.v}, released ${shortDate(RELEASE.date)}.`;
+    $("ver").textContent = `Version ${RELEASE.v}, released ${shortDate(RELEASE.date)}. First released ${shortDate(RELEASE.first)}.`;
     const h = readHash();
     const p = D.res.NATIONAL.personnel; let best = 0; p.forEach((v, i) => { if (v != null && v > (p[best] || 0)) best = i; });
     idx = h.date ? (idxForDate(h.date) ?? best) : best;   // default: the busiest report in the record
