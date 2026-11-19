@@ -511,3 +511,7 @@ body.stats-open { overflow: hidden; }
   .maptools .pinbadge .pb-date { font-size: 11px; }
   .maptools .pinbadge .plchip { width: 22px; height: 22px; font-size: 13px; }
 }
+/* v3.3 (D-243): the area line under the date stays one line, so selecting an area never changes the top
+   section's height (the map jumped and, pinned, the tiles showed above it) */
+@media (max-width: 860px) { .hud .date small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+@media (max-width: 860px) and (max-height: 760px) { .hud .date small .taphint { display: none; } }

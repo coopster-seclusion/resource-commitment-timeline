@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.2", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.3", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -463,7 +463,7 @@
   }
   function hud() {
     const np = D.natpl[idx], chip = $("natplM"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : ""; chip.classList.toggle("pl5", np === 5);
-    $("dateM").innerHTML = `${fmtDate(D.dates[idx])}<small id="scopeM">${scope === "NATIONAL" ? "National totals" : `${GNAME[scope]} (${scope}) &middot; tap again for national`}</small>`;
+    $("dateM").innerHTML = `${fmtDate(D.dates[idx])}<small id="scopeM">${scope === "NATIONAL" ? "National totals" : `${GNAME[scope]} (${scope})<span class="taphint"> &middot; tap again for national</span>`}</small>`;
     HUDN.forEach(([k]) => setNum($("hv-" + k), seriesFor(k)[idx]));
     MININ.forEach(([k]) => setNum($("mv-" + k), seriesFor(k)[idx]));
     for (const id of ["miniPl", "pbPl"]) { const c = $(id); c.textContent = np || "-"; c.style.background = np ? plColor(np) : ""; c.classList.toggle("pl5", np === 5); }
