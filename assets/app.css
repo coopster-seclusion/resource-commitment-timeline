@@ -110,7 +110,8 @@ h1 { margin: 0; font: 800 28px/1.02 var(--f-display); letter-spacing: .005em; te
 @media (max-width: 1400px) and (min-width: 861px) { .gtiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .mapwrap { position: relative; min-height: 0; overflow: hidden; }
 #map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.maptools { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 6px; z-index: 2; }
+.maptools { position: absolute; top: 14px; left: 14px; right: max(14px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: 6px; z-index: 2; pointer-events: none; }
+.maptools > * { pointer-events: auto; flex: none; }
 .pills { display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; z-index: 2; }
 .pills button { border: 0; background: transparent; color: var(--ink2); font: 600 12px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; cursor: pointer; }
 .pills button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
@@ -179,7 +180,7 @@ dialog::backdrop { background: rgba(5, 7, 10, .55); }
   .stage > .callout { left: 10px; bottom: calc(var(--scrubh, 67px) + 10px); padding: 10px 12px; }
   .callout .ct { font-size: 18px; }
   .scrub { padding-left: max(14px, env(safe-area-inset-left, 0px)); }
-  .maptools { top: 10px; left: max(10px, env(safe-area-inset-left, 0px)); gap: 4px; }
+  .maptools { top: 10px; left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); gap: 4px; }
   .pills button { padding: 8px 9px; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
@@ -233,7 +234,7 @@ body.present { overflow: hidden; }
 /* v2.1: PL 5 ring (chips only, not the map), step buttons while paused, callout reading bar */
 .plchip.pl5 { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--alert); }
 .plc.pl5 { box-shadow: 0 0 0 1.5px var(--card), 0 0 0 3px var(--alert); }
-.stepper { position: absolute; top: 14px; right: max(14px, env(safe-area-inset-right, 0px)); display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; z-index: 2;
+.stepper { margin-left: auto; display: flex; gap: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px; z-index: 2;
   transition: opacity .2s, transform .2s; }
 .stepper button { width: 44px; height: 32px; border: 0; border-radius: 999px; background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; }
 .stepper button:hover { background: var(--card); }
@@ -246,7 +247,6 @@ body.present { overflow: hidden; }
 .callout.reading::after { animation: readbar 5s linear forwards; }
 @keyframes readbar { from { width: 100%; } to { width: 0; } }
 @media (max-width: 860px) {
-  .stepper { top: 10px; right: max(10px, env(safe-area-inset-right, 0px)); }
   .stepper button { width: 38px; height: 32px; }
   .yearload { top: 54px; }
 }
@@ -304,7 +304,8 @@ body.present { overflow: hidden; }
 .statsbtn:hover { border-color: var(--gacc-line); }
 .statsbtn:focus-visible { outline: 2px solid var(--cursor); outline-offset: 2px; }
 @media (max-width: 860px) { .statsbtn { height: 36px; padding: 0 9px 0 7px; gap: 4px; } }
-@media (max-width: 370px) { .statsbtn span { display: none; } .statsbtn { padding: 0 10px; } }
+@media (max-width: 399px) { .statsbtn span { display: none; } .statsbtn { padding: 0 10px; } }
+@media (max-width: 339px) { .pills button { padding: 8px 7px; } .stepper button { width: 34px; } }
 body.stats-open { overflow: hidden; }
 .stats { position: fixed; inset: 0; z-index: 40; background: var(--bg); display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .stats[hidden] { display: none; }
