@@ -25,7 +25,7 @@ Static site. No build step, no server code, no analytics, no third-party request
 
 ## Releases
 
-v2.0 to v3.2 were released on 19 Nov 2026 (first release 16 Nov 2026); what each changed is in the commit log and in the thesis repo `DECISIONS.md` (D-231 to D-242). v3.1 added a short-screen mode for phones under 760 px of page height (iPhone SE size); `tools/phone_shots.mjs` checks six phone sizes, locally or on the live site with `SITE=`.
+v2.0 to v3.3 were released on 19 Nov 2026 (first release 16 Nov 2026); what each changed is in the commit log and in the thesis repo `DECISIONS.md` (D-231 to D-243). v3.1 added a short-screen mode for phones under 760 px of page height (iPhone SE size); `tools/phone_shots.mjs` checks six phone sizes, locally or on the live site with `SITE=`.
 
 ## Rebuilding the data
 
