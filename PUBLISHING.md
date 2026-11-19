@@ -27,7 +27,9 @@ Checklist for the owner. Nothing here is published yet.
 
 ## Each release
 
-- Bump `RELEASE` in `assets/app.js` (shown in About) and the `?v=` on the CSS and JS links in `index.html`.
+- Bump `RELEASE` in `assets/app.js` (shown in About) and the `?v=` on the CSS and JS links in `index.html`. `stats.js` takes the same `?v=` as app.js, so it needs no separate bump.
+- Check at phone widths 320, 360 and 375 px as well as desktop, dark and light: buttons on the map tool row must not overlap.
+- After visual changes, `node tools/preview.mjs` (site served locally) to redo `preview.png`.
 
 ## Each data update
 
