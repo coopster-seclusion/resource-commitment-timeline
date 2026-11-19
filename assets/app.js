@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.3", date: "2026-11-19" };   // bump on each published change
+  const RELEASE = { v: "2.4", date: "2026-11-19" };   // bump on each published change
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -345,7 +345,7 @@
       ${c.k === "tank" ? '<div class="note" id="n-tank"></div>' : ""}</div>`).join("");
     CARDS.forEach(c => {
       const cv = $("s-" + c.k);
-      cv.addEventListener("mousemove", e => sparkHover(c.k, e));
+      cv.addEventListener("mousemove", e => { if (!fromTouch()) sparkHover(c.k, e); });
       cv.addEventListener("mouseleave", hideTip);
       cv.addEventListener("click", e => { const i = sparkIndex(c.k, e); if (i != null) { stop(); setIdx(i); } });
     });
@@ -583,6 +583,10 @@
 
   // ---------- tooltip & map hit ----------
   const tip = $("tip");
+  // Tooltips are for a mouse. A tap fires a mouse move too, so ignore moves that follow a touch (v2.4).
+  let lastTouch = -1e9;
+  document.addEventListener("touchstart", () => { lastTouch = performance.now(); hideTip(); }, { passive: true, capture: true });
+  const fromTouch = () => performance.now() - lastTouch < 1000;
   function showTip(e, html) {
     tip.innerHTML = html; tip.hidden = false;
     const host = $("mapwrap").contains(e.target) ? $("mapwrap") : document.body;
@@ -605,7 +609,7 @@
   function gaccAt(x, y) { for (const g of D.gaccs) if (gpaths[g] && hit.isPointInPath(gpaths[g], x, y)) return g; return null; }
   function mapPos(e) { const r = map.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
   map.addEventListener("mousemove", e => {
-    if (!D) return; const [x, y] = mapPos(e);
+    if (!D || fromTouch()) return; const [x, y] = mapPos(e);
     const f = mode !== "pl" ? incAt(x, y) : null;
     if (f) { const [Y, i] = f, o = i * F; showTip(e, `<b>${esc(Y.names[Y.inc[o + C.name]])}</b> <span class="gchip">${D.gaccs[Y.inc[o + C.gacc]] || ""}</span><br><span class="m">${fmt(Y.inc[o + C.pers])} personnel &middot; ${fmt(Y.inc[o + C.crews])} crews<br>${fmt(Y.inc[o + C.eng])} engines &middot; ${fmt(Y.inc[o + C.heli])} helicopters</span>`); map.style.cursor = "pointer"; return; }
     const g = gaccAt(x, y);
@@ -629,7 +633,7 @@
   stepButton($("prev"), -1); stepButton($("next"), 1);
   $("slider").addEventListener("input", e => { stop(); setIdx(nearestIdx(+e.target.value / (T1 - T0))); });
   $("trackc").parentElement.addEventListener("mousemove", e => {
-    if (!D) return; const r = $("trackc").getBoundingClientRect(); const i = nearestIdx((e.clientX - r.left) / r.width);
+    if (!D || fromTouch()) return; const r = $("trackc").getBoundingClientRect(); const i = nearestIdx((e.clientX - r.left) / r.width);
     showTip(e, `<b>${shortDate(D.dates[i])}</b><br><span class="m">National PL ${D.natpl[i] || "not printed"}</span>`);
   });
   $("trackc").parentElement.addEventListener("mouseleave", hideTip);
