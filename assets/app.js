@@ -431,7 +431,13 @@
     CARDS.forEach(c => $("c-" + c.k).classList.toggle("sel", c.k === trend));
     $("cards").classList.toggle("has-sel", !!trend);
     document.querySelectorAll(".hn[data-k]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === trend)));
-    requestAnimationFrame(buildSparks);   // the card was hidden, so its sparkline had no width
+    requestAnimationFrame(() => {
+      buildSparks();   // the card was hidden, so its sparkline had no width
+      // Phones: the map and scrubber are pinned over the page, so bring the card out from under them if needed
+      if (!trend || !PHONE.matches) return;
+      const top = $("c-" + trend).getBoundingClientRect().top, below = document.querySelector(".scrub").getBoundingClientRect().bottom + 8;
+      if (top < below) window.scrollBy({ top: top - below, behavior: reduced ? "auto" : "smooth" });
+    });
   }
   function hud() {
     const np = D.natpl[idx], chip = $("natplM"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : ""; chip.classList.toggle("pl5", np === 5);

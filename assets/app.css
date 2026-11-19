@@ -275,6 +275,7 @@ body.present { overflow: hidden; }
 @media (max-width: 860px) {
   .rail-body .cards { order: 1; } .rail-body #inctitle { order: 2; margin-top: 0; } .rail-body .inc { order: 3; }
   .rail-body #intlwrap { order: 4; } .rail-body .foot { order: 5; }
+  html, body { overflow-anchor: none; }   /* a card shown above the list must not scroll the page under the pinned map */
   .cards:not(.has-sel) { display: none; }
   .cards .card:not(.sel) { display: none; }
   .inc li { height: 50px; align-content: center; }   /* every row the same height, so the list never jumps */
