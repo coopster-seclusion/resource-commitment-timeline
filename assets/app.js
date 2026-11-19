@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.0", date: "2026-11-19" };   // bump on each published change
+  const RELEASE = { v: "2.1", date: "2026-11-19" };   // bump on each published change
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -310,6 +310,10 @@
       : `<div class="ce">${y} &middot; National PL 5</div><div class="ct">Top preparedness level</div>
          <div class="cb">${shortDate(c.date)} is the first report of ${y} at National PL 5. ${c.personnel != null ? fmt(c.personnel) + " personnel committed." : ""}</div>`;
     el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
+    if (playing && !reduced) {   // slow playback while it is read; the bar along its foot shows the time left
+      slowUntil = performance.now() + READ_MS;
+      el.classList.remove("reading"); void el.offsetWidth; el.classList.add("reading");
+    }
   }
 
   // ---------- panel ----------
@@ -416,14 +420,14 @@
     $("gtiles").addEventListener("click", e => { const b = e.target.closest("button[data-g]"); if (b) setScope(b.dataset.g === scope ? "NATIONAL" : b.dataset.g); });
   }
   function hud() {
-    const np = D.natpl[idx], chip = $("natplM"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : "";
+    const np = D.natpl[idx], chip = $("natplM"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : ""; chip.classList.toggle("pl5", np === 5);
     $("dateM").innerHTML = `${fmtDate(D.dates[idx])}<small id="scopeM">${scope === "NATIONAL" ? "National totals" : `${GNAME[scope]} (${scope}) &middot; tap again for national`}</small>`;
     HUDN.forEach(([k]) => setNum($("hv-" + k), seriesFor(k)[idx]));
     $("hv-tank").previousElementSibling.textContent = scope === "NATIONAL" ? "Airtankers" : "Tankers, US";  // no area split
     const ia = intlByArea();
     D.gaccs.forEach(g => {
       const pl = D.pl[g][idx], p = D.res[g].personnel[idx], b = $("gtiles").querySelector(`[data-g="${g}"]`), l = $("gl-" + g), it = ia[g];
-      l.textContent = pl || "-"; l.className = "plc" + (pl ? "" : " none"); l.style.background = pl ? plColor(pl) : "";
+      l.textContent = pl || "-"; l.className = "plc" + (pl ? "" : " none") + (pl === 5 ? " pl5" : ""); l.style.background = pl ? plColor(pl) : "";
       $("gp-" + g).textContent = p == null ? "-" : fmt(p);
       const gf = $("gf-" + g), fl = it ? [...it.p].join() + "|" + it.n : "";
       if (gf.dataset.k !== fl) { gf.dataset.k = fl; gf.hidden = !it; gf.innerHTML = it ? flags([...it.p]) + (it.n ? `<span>+${fmt(it.n)}</span>` : "") : ""; }
@@ -435,7 +439,7 @@
   function panel() {
     const s = D.dates[idx];
     $("date").innerHTML = `${fmtDate(s)}<small id="dategap">${gapNote()}</small>`;
-    const np = D.natpl[idx], chip = $("natpl"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : "";
+    const np = D.natpl[idx], chip = $("natpl"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : ""; chip.classList.toggle("pl5", np === 5);
     chip.setAttribute("aria-label", np ? "National preparedness level " + np : "National PL not printed");
     CARDS.forEach(c => { setNum($("v-" + c.k), seriesFor(c.k)[idx]); $("d-" + c.k).innerHTML = delta(c.k); });
     const av = D.tank.available[idx];
@@ -506,14 +510,17 @@
   }
   function setScope(s) { scope = s; baseKey = ""; buildSparks(); draw(); panel(); writeHash(); }
   function setMode(m) { mode = m; MODES.forEach(k => $("m-" + k).setAttribute("aria-pressed", String(k === m))); trail = null; draw(); writeHash(); }
+  const READ_MS = 5000, READ_RATE = 2;   // reports per second while a new callout is read
+  let slowUntil = 0;
   function play() {
-    if (idx >= N - 1) idx = 0; playing = true; $("play").innerHTML = "&#10074;&#10074;"; $("play").setAttribute("aria-label", "Pause");
+    if (idx >= N - 1) idx = 0; playing = true; document.body.classList.add("playing"); $("play").innerHTML = "&#10074;&#10074;"; $("play").setAttribute("aria-label", "Pause");
     last = performance.now(); acc = 0; requestAnimationFrame(tick);
   }
-  function stop() { if (!playing) return; playing = false; $("play").innerHTML = "&#9654;"; $("play").setAttribute("aria-label", "Play"); writeHash(); }
+  function stop() { if (!playing) return; playing = false; slowUntil = 0; $("callout").classList.remove("reading"); document.body.classList.remove("playing"); $("play").innerHTML = "&#9654;"; $("play").setAttribute("aria-label", "Play"); writeHash(); }
   function tick(t) {
     if (!playing) return;
-    acc += (t - last) / 1000 * parseFloat($("speed").value); last = t;
+    const sp = parseFloat($("speed").value);
+    acc += (t - last) / 1000 * (t < slowUntil ? Math.min(sp, READ_RATE) : sp); last = t;
     if (acc >= 1) {
       const n = Math.floor(acc); acc -= n;
       if (rows(Math.min(N - 1, idx + n)) == null) { acc = 0; loadYear(yOf[Math.min(N - 1, idx + n)]); } // wait for next year's file
@@ -582,6 +589,15 @@
   // ---------- controls ----------
   $("play").onclick = () => playing ? stop() : play();
   MODES.forEach(m => $("m-" + m).onclick = () => setMode(m));
+  function stepButton(el, d) {
+    let hold = 0, rep = 0, held = false;
+    const end = () => { clearTimeout(hold); clearInterval(rep); };
+    el.addEventListener("pointerdown", () => { held = false; end(); hold = setTimeout(() => { held = true; rep = setInterval(() => setIdx(idx + d), 110); }, 420); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, end));
+    el.addEventListener("click", () => { if (held) { held = false; return; } stop(); setIdx(idx + d); });
+    el.addEventListener("contextmenu", e => e.preventDefault());   // long press on phones
+  }
+  stepButton($("prev"), -1); stepButton($("next"), 1);
   $("slider").addEventListener("input", e => { stop(); setIdx(nearestIdx(+e.target.value / (T1 - T0))); });
   $("trackc").parentElement.addEventListener("mousemove", e => {
     if (!D) return; const r = $("trackc").getBoundingClientRect(); const i = nearestIdx((e.clientX - r.left) / r.width);
