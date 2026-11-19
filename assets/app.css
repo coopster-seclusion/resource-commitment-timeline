@@ -405,3 +405,65 @@ body.stats-open { overflow: hidden; }
   .recs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rec .v { font-size: 20px; }
 }
+/* ---- v3.1 short phones (thesis D-241): iPhone SE and similar, under 760 px of page height ---- */
+.mini .hn .ls { display: none; }
+@media (max-width: 860px) and (max-height: 760px) {
+  .stage { min-height: 460px; }
+  /* top section: title as a small line above the date; theme and info buttons beside National PL */
+  .hud { padding-top: max(8px, env(safe-area-inset-top, 0px)); padding-bottom: 8px; gap: 6px; }
+  .hud-top { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "ht pl tools" "date pl tools" "nums nums nums";
+    column-gap: 10px; row-gap: 1px; align-items: center; }
+  .hud-top .hud-row { display: contents; }
+  .hud .ht { grid-area: ht; font: 600 10px/1.2 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .hud .tools { grid-area: tools; }
+  .hud .tools .iconbtn { width: 30px; height: 30px; }
+  .hud .date { grid-area: date; font-size: 19px; }
+  .hud .date small { font-size: 11px; margin-top: 0; }
+  .hud .natpl { grid-area: pl; gap: 3px; min-width: 0; }
+  .hud .natpl .lbl { font-size: 9px; letter-spacing: .06em; }
+  .hud .natpl .plchip { width: 34px; height: 34px; font-size: 20px; border-radius: 9px; }
+  .hud-nums { grid-area: nums; margin-top: 6px; padding-top: 6px; }
+  .hud .hn .v { font-size: 16px; }
+  .gtiles { gap: 4px; }
+  .gt { padding: 4px 5px 4px 6px; gap: 3px 4px; }
+  .gt .gp { font-size: 13px; }
+  .gt .plc { width: 17px; height: 14px; }
+  .gt .gi { font-size: 10px; }
+  .gt .flag { width: 13px; height: 9.75px; }
+  /* pinned strip: one line, date and PL chip, then the five figures */
+  .mini { top: 50px; padding: 5px 8px; gap: 0; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 8px; }
+  .mini-row { gap: 6px; justify-content: flex-start; }
+  .mini-date { font-size: 13px; white-space: nowrap; }
+  .mini-date .wd { display: none; }
+  .mini-date small { margin-left: 4px; font-size: 10px; }
+  .mini-pl .lbl { display: none; }
+  .mini-pl .plchip { width: 24px; height: 24px; font-size: 14px; border-radius: 6px; }
+  .mini-nums { border-top: 0; padding-top: 0; border-left: 1px solid var(--line); padding-left: 8px; gap: 2px; }
+  .mini .hn { gap: 2px; padding: 2px 3px; margin: -2px -3px; }
+  .mini .hn .lf { display: none; }
+  .mini .hn .ls { display: inline; }
+  .mini .hn .l { letter-spacing: .03em; }
+  .mini .hn .v { font-size: 13px; }
+  /* callout: headline only; a tap opens the full text */
+  .stage > .callout { bottom: calc(var(--scrubh, 67px) + 8px); padding: 7px 10px 8px; cursor: pointer; }
+  .callout .ct { font-size: 15px; margin: 4px 0 0; }
+  .callout .ct.ci { font-size: 14px; }
+  .callout .ct.ci .flag { width: 18px; height: 13.5px; }
+  .callout .cb { display: none; margin-top: 4px; }
+  .callout.more .cb { display: block; }
+  .callout .ce::after { content: "  ·  tap for more"; color: var(--muted); letter-spacing: .06em; }
+  .callout.more .ce::after { content: "  ·  tap to fold"; }
+}
+@media (max-width: 340px) and (max-height: 760px) {
+  .mini .hn[data-k="tank"] { display: none; }   /* four figures fit at 320 px */
+  .mini-nums { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+/* v3.1 narrow phones (320 px): tile codes, title and timeline labels fit (D-241) */
+@media (max-width: 860px) and (max-height: 760px) { .hud .ht { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+@media (max-width: 340px) {
+  .gt { padding: 4px 4px 4px 5px; gap: 3px 2px; }
+  .gt .gc { font-size: 10px; letter-spacing: .02em; }
+  .gt .plc { width: 15px; height: 14px; font-size: 9px; }
+  .gt .gp { font-size: 12px; }
+  .hud .hn .v { font-size: 15px; }
+}

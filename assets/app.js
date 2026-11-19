@@ -8,9 +8,12 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
+  // Short phones (v3.1, D-241): an iPhone SE in Safari shows about 550 px of page. Below 760 px of height the
+  // top section, pinned strip and callout are compact and the map is fitted to leave room for them.
+  const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.0", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.1", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -102,7 +105,11 @@
     const r = $("mapwrap").getBoundingClientRect();
     W = Math.max(1, r.width); H = Math.max(1, r.height); dpr = Math.min(2, window.devicePixelRatio || 1);
     map.width = Math.round(W * dpr); map.height = Math.round(H * dpr);
-    const pad = W < 600 ? 12 : 40, top = W < 600 ? 52 : 64, bottom = W < 860 ? 12 : 48;
+    const short = SHORT.matches;
+    // short phones: room above the land for the pinned strip only while it shows (it shows once the top section
+    // has scrolled away), and room below for the compact callout
+    const stripOn = short && $("mini").classList.contains("on");
+    const pad = W < 600 ? 12 : 40, top = stripOn ? 104 : short ? 56 : W < 600 ? 52 : 64, bottom = short ? 66 : W < 860 ? 12 : 48;
     proj = d3.geoAlbersUsa().fitExtent([[pad, top], [W - pad, H - bottom]], D.gacc);
     const path = d3.geoPath(proj);
     gpaths = {}; gcent = {}; landPath = new Path2D();
@@ -316,6 +323,7 @@
          <div class="cb">${shortDate(c.date)}. Largest incident: <b>${esc(c.top)}</b>${c.gacc ? ` (${GNAME[c.gacc] || c.gacc})` : ""}, ${fmt(c.top_personnel)} personnel.</div>`
       : `<div class="ce">${y} &middot; National PL 5</div><div class="ct">Top preparedness level</div>
          <div class="cb">${shortDate(c.date)} is the first report of ${y} at National PL 5. ${c.personnel != null ? fmt(c.personnel) + " personnel committed." : ""}</div>`;
+    el.classList.remove("more");
     el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
     if (playing && !reduced) {   // slow playback while it is read; the bar along its foot shows the time left
       slowUntil = performance.now() + READ_MS;
@@ -421,9 +429,14 @@
   const HUDN = [["personnel", "Personnel"], ["crews", "Crews"], ["engines", "Engines"], ["helicopters", "Helis"], ["tank", "Airtankers"]];
   const MININ = HUDN;   // phones, pinned map: the same five figures as the HUD
   function hudInit() {
-    $("miniNums").innerHTML = MININ.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="mv-${k}">-</span></button>`).join("");
+    const SHORTL = { personnel: "Pers", crews: "Crews", engines: "Eng", helicopters: "Helis", tank: "Tankers" };
+    $("miniNums").innerHTML = MININ.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l"><span class="lf">${l}</span><span class="ls">${SHORTL[k]}</span></span><span class="v" id="mv-${k}">-</span></button>`).join("");
     // show the strip once the HUD has (almost) scrolled out of view
-    new IntersectionObserver(([e]) => $("mini").classList.toggle("on", e.intersectionRatio < .15), { threshold: [0, .15, .3] }).observe($("hud"));
+    new IntersectionObserver(([e]) => {
+      const was = $("mini").classList.contains("on"), on = e.intersectionRatio < .15;
+      $("mini").classList.toggle("on", on);
+      if (on !== was && SHORT.matches && D) layout();   // refit the map around the strip (D-241)
+    }, { threshold: [0, .15, .3] }).observe($("hud"));
     $("hudnums").innerHTML = HUDN.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></button>`).join("");
     $("gtiles").innerHTML = D.gaccs.map(g => `<button type="button" class="gt" data-g="${g}" aria-pressed="false">
       <span class="gc">${g}</span><span class="plc" id="gl-${g}">-</span>
@@ -452,8 +465,11 @@
     HUDN.forEach(([k]) => setNum($("hv-" + k), seriesFor(k)[idx]));
     MININ.forEach(([k]) => setNum($("mv-" + k), seriesFor(k)[idx]));
     const mp = $("miniPl"); mp.textContent = np || "-"; mp.style.background = np ? plColor(np) : ""; mp.classList.toggle("pl5", np === 5);
-    $("miniDate").innerHTML = `${fmtDate(D.dates[idx])}${scope === "NATIONAL" ? "" : `<small>${scope}</small>`}`;
-    ["hv-tank", "mv-tank"].forEach(id => $(id).previousElementSibling.textContent = scope === "NATIONAL" ? "Airtankers" : "Tankers, US");  // no area split
+    $("miniDate").innerHTML = `<span class="wd">${DOW[new Date(D.dates[idx] + "T00:00:00Z").getUTCDay()]} </span>${shortDate(D.dates[idx])}${scope === "NATIONAL" ? "" : `<small>${scope}</small>`}`;
+    const nat = scope === "NATIONAL";   // airtankers have no area split
+    $("hv-tank").previousElementSibling.textContent = nat ? "Airtankers" : "Tankers, US";
+    const ml = $("mv-tank").previousElementSibling;
+    ml.querySelector(".lf").textContent = nat ? "Airtankers" : "Tankers, US"; ml.querySelector(".ls").textContent = nat ? "Tankers" : "Tank US";
     const ia = intlByArea();
     D.gaccs.forEach(g => {
       const pl = D.pl[g][idx], p = D.res[g].personnel[idx], b = $("gtiles").querySelector(`[data-g="${g}"]`), l = $("gl-" + g), it = ia[g];
@@ -528,7 +544,7 @@
     D.callouts.forEach(c => { if (c.kind !== "peak") return; const x = dayX(c.i, w); g.beginPath(); g.moveTo(x - 3, 0); g.lineTo(x + 3, 0); g.lineTo(x, 4); g.closePath(); g.fill(); });
     g.fillStyle = colors["--cursor"]; (D.intl || []).forEach(s => { const x0 = dayX(s.a, w), x1 = Math.max(x0 + 1.5, dayX(s.b, w)); g.fillRect(x0, h - 2, x1 - x0, 2); });
     const yrs = $("years"); let html = "";
-    const step = w < 500 ? 3 : w < 900 ? 2 : 1;
+    const step = Math.max(1, Math.ceil(28 / (w / 19)));   // a year label every k years, at least 28 px apart (D-241)
     for (let y = 2007; y <= 2025; y++) { const f = (Date.UTC(y, 0, 1) / 864e5 - T0) / (T1 - T0); if ((y - 2007) % step === 0) html += `<span style="left:${(f * 100).toFixed(2)}%">${y}</span>`; }
     yrs.innerHTML = html;
     $("slider").max = String(Math.round(T1 - T0));
@@ -741,6 +757,8 @@
     });
   }
   $("statsbtn").onclick = () => showStats(undefined, true);
+  // short phones: the callout shows its headline; a tap opens or folds the full text (D-241)
+  $("callout").addEventListener("click", () => { if (SHORT.matches) $("callout").classList.toggle("more"); });
   $("statsclose").onclick = () => closeStats();
   window.addEventListener("popstate", () => {
     if (location.hash.startsWith("#stats")) { if ($("stats").hidden) showStats(location.hash.split("/")[1], false); }
