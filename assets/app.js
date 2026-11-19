@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.1", date: "2026-11-19" };   // bump on each published change
+  const RELEASE = { v: "2.2", date: "2026-11-19" };   // bump on each published change
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -624,6 +624,10 @@
     else if (e.key === "ArrowLeft") { stop(); setIdx(idx - (e.shiftKey ? 30 : 1)); }
   });
   const ro = new ResizeObserver(() => { if (D) layout(); }); ro.observe($("mapwrap")); ro.observe($("cards"));
+  // Phones: the stage is sticky with top = minus the HUD height, so the HUD scrolls away and map and scrubber stay.
+  // The callout sits above the scrubber on desktop (offset by its height) and below it on phones.
+  function stick() { const st = document.querySelector(".stage"); st.style.setProperty("--stick", -$("hud").offsetHeight + "px"); st.style.setProperty("--scrubh", document.querySelector(".scrub").offsetHeight + "px"); }
+  new ResizeObserver(stick).observe($("hud")); new ResizeObserver(stick).observe(document.querySelector(".scrub")); stick();
   const retheme = () => { if (!D) return; readColors(); baseKey = ""; trail = null; layoutTrack(); buildSparks(); draw(); panel(); };
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme);
   new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
