@@ -210,6 +210,9 @@
     if (R && mode === "heat") drawHeat(R); else if (R && mode === "pts") drawPoints(R);
     if (R && mode !== "pl") pulse(R);
     labels();
+    // the picked incident keeps its ring through any redraw (a relief image or year file arriving later, D-239)
+    if (picked && picked.at !== idx) { picked = null; flashKey = ""; }   // a new report date clears the pick
+    if (picked) { const Y = yearOf(idx); if (Y.px && !isNaN(Y.px[picked.i])) { ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ring(Y.px[picked.i], Y.py[picked.i], 11); } }
     prevIdx = idx;
   }
   function labels() {
@@ -647,19 +650,20 @@
   // Incident ring (v2.7): dark halo, white ring, sky-blue dashes on top, so it reads on bright heat and on pale land.
   // A new pick pulses outward for about 1.5 s, then the ring stays. No pulse under reduced motion.
   const RING = { halo: "rgba(5, 7, 10, .8)", white: "#ffffff", blue: "#38bdf8" };
-  let flashRaf = 0, flashKey = "";
+  let flashRaf = 0, flashKey = "", picked = null;
   function ring(x, y, r, a = 1) {
     ctx.save(); ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.lineWidth = 6; ctx.strokeStyle = RING.halo; ctx.stroke();
     ctx.lineWidth = 2.5; ctx.strokeStyle = RING.white; ctx.stroke();
     ctx.setLineDash([5, 5]); ctx.strokeStyle = RING.blue; ctx.stroke(); ctx.restore();
   }
-  function stopFlash() { cancelAnimationFrame(flashRaf); flashRaf = 0; flashKey = ""; }
+  function stopFlash() { cancelAnimationFrame(flashRaf); flashRaf = 0; flashKey = ""; picked = null; }
   function flash(i) {
     const Y = yearOf(idx), key = idx + ":" + i;
-    if (key === flashKey) return;            // same incident: keep the running pulse
+    if (key === flashKey && picked) return;  // same incident, ring still showing: keep it
     stopFlash(); draw();
     if (!Y.px || isNaN(Y.px[i])) return;
+    picked = { i, at: idx };
     const x = Y.px[i], y = Y.py[i], t0 = performance.now(), D_MS = 1500, at = idx;
     flashKey = key;
     // the map is drawn once and copied; each frame puts the copy back and draws only the rings
