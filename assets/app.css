@@ -163,8 +163,7 @@ dialog::backdrop { background: rgba(5, 7, 10, .55); }
   body { overflow: auto; }
   .app { height: auto; grid-template-columns: 1fr; }
   /* the HUD scrolls away, then map and scrubber stay pinned while the cards scroll beneath (v2.2) */
-  .stage { order: 0; height: auto; position: sticky; top: var(--stick, 0px); z-index: 4; }
-  .mapwrap { height: min(calc(100vw * .62 + 64px), calc(100vh - 150px)); height: min(calc(100vw * .62 + 64px), calc(100svh - 150px)); min-height: 240px; }
+  .stage { order: 0; height: 100vh; height: 100svh; min-height: 600px; position: sticky; top: var(--stick, 0px); z-index: 4; }
   .rail-head { display: none; }
   .hud { padding: 10px 12px 10px; padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); padding-top: max(10px, env(safe-area-inset-top, 0px)); gap: 8px; }
   .hud-top { display: grid; }
@@ -176,7 +175,7 @@ dialog::backdrop { background: rgba(5, 7, 10, .55); }
   .rail-head, .rail-body { padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .rail-body { overflow: visible; }
   .legend { display: none; }
-  .stage > .callout { top: 100%; bottom: auto; left: 10px; right: 10px; max-width: none; margin-top: 8px; padding: 10px 12px; }
+  .stage > .callout { left: 10px; bottom: calc(var(--scrubh, 67px) + 10px); padding: 10px 12px; }
   .callout .ct { font-size: 18px; }
   .scrub { padding-left: max(14px, env(safe-area-inset-left, 0px)); }
   .pills { top: 10px; left: 10px; }
@@ -249,4 +248,20 @@ body.present { overflow: hidden; }
   .stepper { top: 10px; right: max(10px, env(safe-area-inset-right, 0px)); }
   .stepper button { width: 40px; height: 32px; }
   .yearload { top: 54px; }
+}
+/* v2.2: phones, once the HUD has scrolled away: date, National PL and four figures in the space above the map */
+.mini { display: none; }
+@media (max-width: 860px) {
+  .mini { display: grid; gap: 8px; position: absolute; top: 54px; left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); z-index: 2;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; box-shadow: var(--shadow);
+    opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .2s, transform .2s; }
+  .mini.on { opacity: 1; transform: none; }
+  .mini-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .mini-date { font: 700 18px/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+  .mini-date small { font: 400 11px/1 var(--f-body); color: var(--muted); margin-left: 6px; }
+  .mini-pl { display: flex; align-items: center; gap: 8px; }
+  .mini-pl .lbl { font: 600 9px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .mini-pl .plchip { width: 30px; height: 30px; border-radius: 8px; font-size: 18px; }
+  .mini-nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; border-top: 1px solid var(--line); padding-top: 7px; }
+  .present .mini { display: none; }
 }

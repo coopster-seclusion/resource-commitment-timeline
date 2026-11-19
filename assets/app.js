@@ -412,7 +412,11 @@
   }
 
   const HUDN = [["personnel", "Personnel"], ["crews", "Crews"], ["engines", "Engines"], ["helicopters", "Helis"], ["tank", "Airtankers"]];
+  const MININ = HUDN.slice(0, 4);   // phones, pinned map: personnel, crews, engines, helicopters
   function hudInit() {
+    $("miniNums").innerHTML = MININ.map(([k, l]) => `<div class="hn"><span class="l">${l}</span><span class="v" id="mv-${k}">-</span></div>`).join("");
+    // show the strip once the HUD has (almost) scrolled out of view
+    new IntersectionObserver(([e]) => $("mini").classList.toggle("on", e.intersectionRatio < .15), { threshold: [0, .15, .3] }).observe($("hud"));
     $("hudnums").innerHTML = HUDN.map(([k, l]) => `<div class="hn"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></div>`).join("");
     $("gtiles").innerHTML = D.gaccs.map(g => `<button type="button" class="gt" data-g="${g}" aria-pressed="false">
       <span class="gc">${g}</span><span class="plc" id="gl-${g}">-</span>
@@ -423,6 +427,9 @@
     const np = D.natpl[idx], chip = $("natplM"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : ""; chip.classList.toggle("pl5", np === 5);
     $("dateM").innerHTML = `${fmtDate(D.dates[idx])}<small id="scopeM">${scope === "NATIONAL" ? "National totals" : `${GNAME[scope]} (${scope}) &middot; tap again for national`}</small>`;
     HUDN.forEach(([k]) => setNum($("hv-" + k), seriesFor(k)[idx]));
+    MININ.forEach(([k]) => setNum($("mv-" + k), seriesFor(k)[idx]));
+    const mp = $("miniPl"); mp.textContent = np || "-"; mp.style.background = np ? plColor(np) : ""; mp.classList.toggle("pl5", np === 5);
+    $("miniDate").innerHTML = `${fmtDate(D.dates[idx])}${scope === "NATIONAL" ? "" : `<small>${scope}</small>`}`;
     $("hv-tank").previousElementSibling.textContent = scope === "NATIONAL" ? "Airtankers" : "Tankers, US";  // no area split
     const ia = intlByArea();
     D.gaccs.forEach(g => {
