@@ -13,6 +13,8 @@ Checklist for the owner. Nothing here is published yet.
 | Terrain Tiles on AWS Open Data (Mapzen) | hillshade | open, attribution required | OK: attribution in the About dialog with a link to the full list |
 | d3 | code | ISC | OK, licence text kept in the minified file header |
 | Fonts | type | SIL OFL 1.1 | OK |
+| seclusion.io site icon, `assets/icons/seclusion.svg` (copied from https://www.seclusion.io/icon.svg, 227 bytes) | About link to the owner's website | owner's own site | OK |
+| LinkedIn "in" mark, drawn inline in `index.html` | About link to the owner's LinkedIn | link to a profile, mark drawn in LinkedIn blue | OK |
 | flag-icons 7.2.3 (lipis), `assets/flags/` (AU, NZ, CA, MX, 4:3 SVG) | international help flags | MIT, licence kept as `assets/flags/LICENSE-flag-icons.txt` | OK; credited in the About dialog |
 | NPS symbol library (person, group, airport) and Mapbox Maki `heliport`, inlined in `assets/app.js`; engine drawn by the author | card symbols | NPS: US government work, believed public domain [A] (repo states no licence); Maki: CC0 | OK; credited in the About dialog |
 

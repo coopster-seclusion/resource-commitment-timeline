@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.5", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "2.6", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;

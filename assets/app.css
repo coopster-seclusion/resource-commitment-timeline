@@ -287,3 +287,10 @@ body.present { overflow: hidden; }
 .keybox .row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .keybox .sw { width: 18px; height: 12px; border-radius: 3px; display: grid; place-items: center; font: 600 9px/1 var(--f-display); color: #fff; }
 .keybox .ramp { width: 120px; height: 10px; border-radius: 3px; }
+/* v2.6: author links above the version line in About */
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.lnk { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px 7px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+  color: var(--ink) !important; text-decoration: none; font: 600 13px/1 var(--f-body); min-height: 36px; }
+.lnk:hover { border-color: var(--gacc-line); }
+.lnk:focus-visible { outline: 2px solid var(--cursor); outline-offset: 2px; }
+.lnk svg, .lnk img { width: 20px; height: 20px; border-radius: 4px; flex: none; }
