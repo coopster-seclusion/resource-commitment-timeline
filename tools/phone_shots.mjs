@@ -48,5 +48,14 @@ function measure() {   // in the page: boxes in viewport px, and the gaps that m
     gap_strip_land: mini && land ? land.t - mini.b : null, gap_land_callout: call && land ? call.t - land.b : null,
     gap_stats_arrows: stats && step ? step.l - stats.r : null, scrub_on_screen: scrub ? scrub.b <= innerHeight + 1 : null,
     gap_callout_badge: call && badge ? badge.l - call.r : null, gap_land_badge: badge && land ? badge.t - land.b : null,
-    strip_overflow: [...document.querySelectorAll("#miniNums .hn")].some(b => b.scrollWidth > b.clientWidth + 1) };
+    strip_overflow: [...document.querySelectorAll("#miniNums .hn")].some(b => b.scrollWidth > b.clientWidth + 1),
+    // v3.2 (D-242): badge in the top row and arrows at the bottom right while pinned on short phones
+    arrows_bottom: document.querySelector("#stepper").parentElement.classList.contains("stage"),
+    gap_stats_badge: badge && stats && document.querySelector("#pinbadge").parentElement.classList.contains("maptools") ? badge.l - stats.r : null,
+    badge_right_margin: badge ? innerWidth - badge.r : null,
+    gap_callout_arrows: call && step && document.querySelector("#stepper").parentElement.classList.contains("stage") ? step.l - call.r : null,
+    gap_land_arrows: step && land && document.querySelector("#stepper").parentElement.classList.contains("stage") ? step.t - land.b : null,
+    // the page scrolls only as far as pinning; the list box has its own scroll
+    page_extra_scroll: document.scrollingElement.scrollHeight - innerHeight - document.querySelector("#hud").offsetHeight,
+    list_box_scrolls: (() => { const b = document.querySelector(".rail-body"); return b.scrollHeight > b.clientHeight && getComputedStyle(b).overflowY === "auto"; })() };
 }

@@ -484,8 +484,30 @@ body.stats-open { overflow: hidden; }
   .pb-pl { display: grid; justify-items: center; gap: 2px; }
   .pb-pl .lbl { font: 600 8px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .pb-pl .plchip { width: 26px; height: 26px; border-radius: 7px; font-size: 15px; }
-  .stage.pinned > .callout { max-width: calc(100% - 20px - 150px); }   /* clear of the badge */
+  .stage.pinned > .callout { max-width: calc(100% - 20px - 100px); }   /* clear of the arrows (D-242) */
   .stage.pinned > .callout:not(.more) .ce, .stage.pinned > .callout:not(.more) .ct { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* one line each */
   .stage.pinned > .callout:not(.more) .ct.ci { display: block; }
   .present .pinbadge { display: none; }
+}
+/* v3.2 (D-242) */
+@media (max-width: 860px) {
+  /* the list scrolls in its own box below the pinned map; its top stops there instead of scrolling the page */
+  .rail { height: var(--hudh, 260px); overflow: hidden; }
+  .rail-body { height: 100%; overflow-y: auto; overscroll-behavior: contain; overflow-anchor: none; -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 860px) and (max-height: 760px) {
+  /* pinned: date and PL in the top row where the arrows were, arrows at the bottom right */
+  .maptools .pinbadge { position: static; margin-left: auto; height: 36px; padding: 0 6px 0 10px; gap: 6px; box-shadow: none; border-radius: 999px; }
+  .maptools .pinbadge .pb-pl .lbl { display: none; }
+  .maptools .pinbadge .pb-date { font-size: 13px; }
+  .maptools .pinbadge .pb-date small { display: none; }
+  .maptools .pinbadge .plchip { width: 26px; height: 26px; font-size: 15px; border-radius: 13px; }
+  .stage > .stepper { position: absolute; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--scrubh, 67px) + 8px); z-index: 3; margin: 0; }
+}
+@media (max-width: 340px) and (max-height: 760px) {
+  .maptools .pinbadge { padding: 0 3px 0 6px; gap: 4px; }
+  .stage.pinned .maptools { gap: 3px; }
+  .stage.pinned .pills button { padding: 8px 6px; }
+  .maptools .pinbadge .pb-date { font-size: 11px; }
+  .maptools .pinbadge .plchip { width: 22px; height: 22px; font-size: 13px; }
 }

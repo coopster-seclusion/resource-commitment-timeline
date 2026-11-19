@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.1", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.2", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -436,6 +436,7 @@
       const was = $("mini").classList.contains("on"), on = e.intersectionRatio < .15;
       $("mini").classList.toggle("on", on); $("pinbadge").classList.toggle("on", on);
       document.querySelector(".stage").classList.toggle("pinned", on);
+      placePinned();
       if (on !== was && SHORT.matches && D) layout();   // refit the map around the strip (D-241)
     }, { threshold: [0, .15, .3] }).observe($("hud"));
     $("hudnums").innerHTML = HUDN.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></button>`).join("");
@@ -456,8 +457,8 @@
       buildSparks();   // the card was hidden, so its sparkline had no width
       // Phones: the map and scrubber are pinned over the page, so bring the card out from under them if needed
       if (!trend || !PHONE.matches) return;
-      const top = $("c-" + trend).getBoundingClientRect().top, below = document.querySelector(".scrub").getBoundingClientRect().bottom + 8;
-      if (top < below) window.scrollBy({ top: top - below, behavior: reduced ? "auto" : "smooth" });
+      const box = document.querySelector(".rail-body"), top = $("c-" + trend).getBoundingClientRect().top, edge = box.getBoundingClientRect().top + 8;
+      if (top < edge) box.scrollBy({ top: top - edge, behavior: reduced ? "auto" : "smooth" });   // the list box scrolls (D-242)
     });
   }
   function hud() {
@@ -721,7 +722,16 @@
   const ro = new ResizeObserver(() => { if (D) layout(); }); ro.observe($("mapwrap")); ro.observe($("cards"));
   // Phones: the stage is sticky with top = minus the HUD height, so the HUD scrolls away and map and scrubber stay.
   // The callout sits above the scrubber on desktop (offset by its height) and below it on phones.
-  function stick() { const st = document.querySelector(".stage"); st.style.setProperty("--stick", -$("hud").offsetHeight + "px"); st.style.setProperty("--scrubh", document.querySelector(".scrub").offsetHeight + "px"); }
+  // Short phones, pinned (v3.2, D-242): the date/PL badge takes the arrows' place at the top right and the
+  // arrows go to the bottom right beside the callout. Elsewhere both keep their usual places.
+  function placePinned() {
+    const swap = SHORT.matches && document.querySelector(".stage").classList.contains("pinned");
+    const tools = document.querySelector(".maptools"), stage = document.querySelector(".stage");
+    if (swap && $("pinbadge").parentElement !== tools) { tools.appendChild($("pinbadge")); stage.appendChild($("stepper")); }
+    if (!swap && $("stepper").parentElement !== tools) { tools.appendChild($("stepper")); stage.appendChild($("pinbadge")); }
+  }
+  SHORT.addEventListener("change", placePinned);
+  function stick() { const st = document.querySelector(".stage"); st.style.setProperty("--stick", -$("hud").offsetHeight + "px"); document.documentElement.style.setProperty("--hudh", $("hud").offsetHeight + "px"); st.style.setProperty("--scrubh", document.querySelector(".scrub").offsetHeight + "px"); }
   new ResizeObserver(stick).observe($("hud")); new ResizeObserver(stick).observe(document.querySelector(".scrub")); stick();
   const retheme = () => { if (!D) return; readColors(); baseKey = ""; trail = null; layoutTrack(); buildSparks(); draw(); panel(); };
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme);
