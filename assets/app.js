@@ -674,7 +674,9 @@
     T0 = Date.UTC(2007, 0, 1) / 864e5; T1 = Date.UTC(2026, 0, 1) / 864e5;
     yOf = new Int16Array(N);
     D.meta.years.forEach((y, k) => { years.push({ year: y.year, i0: y.i0, i1: y.i1 }); for (let i = y.i0; i < y.i1; i++) yOf[i] = k; });
-    $("ver").textContent = `Version ${RELEASE.v}, released ${shortDate(RELEASE.date)}. First released ${shortDate(RELEASE.first)}.`;
+    $("ver").textContent = `Version ${RELEASE.v}, released ${shortDate(RELEASE.date)}.
+First released ${shortDate(RELEASE.first)}.
+Created by SEC with the Claude Code`;
     const h = readHash();
     const p = D.res.NATIONAL.personnel; let best = 0; p.forEach((v, i) => { if (v != null && v > (p[best] || 0)) best = i; });
     idx = h.date ? (idxForDate(h.date) ?? best) : best;   // default: the busiest report in the record
