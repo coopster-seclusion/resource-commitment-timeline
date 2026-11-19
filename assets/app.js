@@ -434,7 +434,8 @@
     // show the strip once the HUD has (almost) scrolled out of view
     new IntersectionObserver(([e]) => {
       const was = $("mini").classList.contains("on"), on = e.intersectionRatio < .15;
-      $("mini").classList.toggle("on", on);
+      $("mini").classList.toggle("on", on); $("pinbadge").classList.toggle("on", on);
+      document.querySelector(".stage").classList.toggle("pinned", on);
       if (on !== was && SHORT.matches && D) layout();   // refit the map around the strip (D-241)
     }, { threshold: [0, .15, .3] }).observe($("hud"));
     $("hudnums").innerHTML = HUDN.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></button>`).join("");
@@ -464,7 +465,8 @@
     $("dateM").innerHTML = `${fmtDate(D.dates[idx])}<small id="scopeM">${scope === "NATIONAL" ? "National totals" : `${GNAME[scope]} (${scope}) &middot; tap again for national`}</small>`;
     HUDN.forEach(([k]) => setNum($("hv-" + k), seriesFor(k)[idx]));
     MININ.forEach(([k]) => setNum($("mv-" + k), seriesFor(k)[idx]));
-    const mp = $("miniPl"); mp.textContent = np || "-"; mp.style.background = np ? plColor(np) : ""; mp.classList.toggle("pl5", np === 5);
+    for (const id of ["miniPl", "pbPl"]) { const c = $(id); c.textContent = np || "-"; c.style.background = np ? plColor(np) : ""; c.classList.toggle("pl5", np === 5); }
+    $("pbDate").innerHTML = `${shortDate(D.dates[idx])}${scope === "NATIONAL" ? "" : `<small>${scope}</small>`}`;
     $("miniDate").innerHTML = `<span class="wd">${DOW[new Date(D.dates[idx] + "T00:00:00Z").getUTCDay()]} </span>${shortDate(D.dates[idx])}${scope === "NATIONAL" ? "" : `<small>${scope}</small>`}`;
     const nat = scope === "NATIONAL";   // airtankers have no area split
     $("hv-tank").previousElementSibling.textContent = nat ? "Airtankers" : "Tankers, US";

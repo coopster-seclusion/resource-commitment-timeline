@@ -454,10 +454,6 @@ body.stats-open { overflow: hidden; }
   .callout .ce::after { content: "  ·  tap for more"; color: var(--muted); letter-spacing: .06em; }
   .callout.more .ce::after { content: "  ·  tap to fold"; }
 }
-@media (max-width: 340px) and (max-height: 760px) {
-  .mini .hn[data-k="tank"] { display: none; }   /* four figures fit at 320 px */
-  .mini-nums { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
 /* v3.1 narrow phones (320 px): tile codes, title and timeline labels fit (D-241) */
 @media (max-width: 860px) and (max-height: 760px) { .hud .ht { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
 @media (max-width: 340px) {
@@ -466,4 +462,30 @@ body.stats-open { overflow: hidden; }
   .gt .plc { width: 15px; height: 14px; font-size: 9px; }
   .gt .gp { font-size: 12px; }
   .hud .hn .v { font-size: 15px; }
+}
+/* v3.1 short phones, pinned: the strip is the five figures as at the top; date and National PL sit in a badge
+   at the map's bottom right, beside the headline callout (D-241) */
+.pinbadge { display: none; }
+@media (max-width: 860px) and (max-height: 760px) {
+  .mini { grid-template-columns: minmax(0, 1fr); padding: 6px 10px 7px; }
+  .mini-row { display: none; }
+  .mini-nums { border-left: 0; padding-left: 0; gap: 4px; }
+  .mini .hn { gap: 3px; padding: 3px 4px; margin: -3px -4px; }
+  .mini .hn .lf { display: inline; }
+  .mini .hn .ls { display: none; }
+  .mini .hn .l { letter-spacing: .08em; }
+  .mini .hn .v { font-size: 16px; }
+  .pinbadge { display: flex; align-items: center; gap: 8px; position: absolute; right: max(10px, env(safe-area-inset-right, 0px)); bottom: calc(var(--scrubh, 67px) + 8px);
+    z-index: 3; padding: 6px 8px 6px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow);
+    opacity: 0; transform: translateY(6px); pointer-events: none; transition: opacity .2s, transform .2s; }
+  .pinbadge.on { opacity: 1; transform: none; }
+  .pb-date { font: 700 14px/1.1 var(--f-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pb-date small { display: block; font: 400 10px/1.2 var(--f-body); color: var(--muted); }
+  .pb-pl { display: grid; justify-items: center; gap: 2px; }
+  .pb-pl .lbl { font: 600 8px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .pb-pl .plchip { width: 26px; height: 26px; border-radius: 7px; font-size: 15px; }
+  .stage.pinned > .callout { max-width: calc(100% - 20px - 150px); }   /* clear of the badge */
+  .stage.pinned > .callout:not(.more) .ce, .stage.pinned > .callout:not(.more) .ct { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* one line each */
+  .stage.pinned > .callout:not(.more) .ct.ci { display: block; }
+  .present .pinbadge { display: none; }
 }

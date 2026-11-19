@@ -42,7 +42,10 @@ function measure() {   // in the page: boxes in viewport px, and the gaps that m
   const on = document.querySelector("#mini").classList.contains("on");
   const land = map && { t: map.t + (short ? (on ? 104 : 56) : 52), b: map.b - (short ? 66 : 12) };   // the extent the map is fitted into
   const stats = box("#statsbtn"), step = box("#stepper"), scrub = box(".scrub");
+  const badge = document.querySelector("#pinbadge").classList.contains("on") ? box("#pinbadge") : null;
   return { short, map, land, mini, callout: call, scrubTop: scrub && scrub.t,
     gap_strip_land: mini && land ? land.t - mini.b : null, gap_land_callout: call && land ? call.t - land.b : null,
-    gap_stats_arrows: stats && step ? step.l - stats.r : null, scrub_on_screen: scrub ? scrub.b <= innerHeight + 1 : null };
+    gap_stats_arrows: stats && step ? step.l - stats.r : null, scrub_on_screen: scrub ? scrub.b <= innerHeight + 1 : null,
+    gap_callout_badge: call && badge ? badge.l - call.r : null, gap_land_badge: badge && land ? badge.t - land.b : null,
+    strip_overflow: [...document.querySelectorAll("#miniNums .hn")].some(b => b.scrollWidth > b.clientWidth + 1) };
 }
