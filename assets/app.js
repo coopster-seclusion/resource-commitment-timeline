@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.6", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "2.7", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -482,7 +482,7 @@
       $("inclist").innerHTML = (list.length ? list.map(i => {
         const o = i * F, g = D.gaccs[Y.inc[o + C.gacc]] || "";
         return `<li tabindex="0" data-i="${i}"><span class="nm">${esc(Y.names[Y.inc[o + C.name]])}</span><span class="pp">${fmt(Y.inc[o + C.pers])}</span>
-          <span class="sub"><span class="gchip">${g}</span>${fmt(Y.inc[o + C.crews])} crews &middot; ${fmt(Y.inc[o + C.eng])} eng &middot; ${fmt(Y.inc[o + C.heli])} heli</span></li>`;
+          <span class="sub"><span class="gchip">${g}</span>${fmt(Y.inc[o + C.crews])} crews &middot; ${fmt(Y.inc[o + C.eng])} eng &middot; ${fmt(Y.inc[o + C.heli])} heli${Y.inc[o + C.has] ? "" : `<span class="nopt" title="Not drawn on the map: no single location (for example a statewide team covering many fires)">no map point</span>`}</span></li>`;
       }).join("") : `<li class="empty">No incidents with committed personnel in this report.</li>`) + pad;
     } else { $("inctitle").textContent = "Incidents with personnel"; $("inclist").innerHTML = `<li class="empty">Loading incidents.</li>`; }
     hud();
@@ -641,11 +641,46 @@
   $("trackc").parentElement.addEventListener("mouseleave", hideTip);
   $("inclist").addEventListener("mouseover", e => { const li = e.target.closest("li[data-i]"); if (li) flash(+li.dataset.i); });
   $("inclist").addEventListener("focusin", e => { const li = e.target.closest("li[data-i]"); if (li) flash(+li.dataset.i); });
-  $("inclist").addEventListener("mouseleave", () => draw());
+  $("inclist").addEventListener("mouseleave", () => { stopFlash(); draw(); });
+  // a tap or click also rings the incident (not every touch browser sends a mouseover on tap)
+  $("inclist").addEventListener("click", e => { const li = e.target.closest("li[data-i]"); if (li) flash(+li.dataset.i); });
+  // Incident ring (v2.7): dark halo, white ring, sky-blue dashes on top, so it reads on bright heat and on pale land.
+  // A new pick pulses outward for about 1.5 s, then the ring stays. No pulse under reduced motion.
+  const RING = { halo: "rgba(5, 7, 10, .8)", white: "#ffffff", blue: "#38bdf8" };
+  let flashRaf = 0, flashKey = "";
+  function ring(x, y, r, a = 1) {
+    ctx.save(); ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.lineWidth = 6; ctx.strokeStyle = RING.halo; ctx.stroke();
+    ctx.lineWidth = 2.5; ctx.strokeStyle = RING.white; ctx.stroke();
+    ctx.setLineDash([5, 5]); ctx.strokeStyle = RING.blue; ctx.stroke(); ctx.restore();
+  }
+  function stopFlash() { cancelAnimationFrame(flashRaf); flashRaf = 0; flashKey = ""; }
   function flash(i) {
-    draw(); const Y = yearOf(idx); if (!Y.px || isNaN(Y.px[i])) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.beginPath(); ctx.arc(Y.px[i], Y.py[i], 11, 0, Math.PI * 2);
-    ctx.strokeStyle = colors["--sel"]; ctx.lineWidth = 2; ctx.stroke();
+    const Y = yearOf(idx), key = idx + ":" + i;
+    if (key === flashKey) return;            // same incident: keep the running pulse
+    stopFlash(); draw();
+    if (!Y.px || isNaN(Y.px[i])) return;
+    const x = Y.px[i], y = Y.py[i], t0 = performance.now(), D_MS = 1500, at = idx;
+    flashKey = key;
+    // the map is drawn once and copied; each frame puts the copy back and draws only the rings
+    const snap = document.createElement("canvas"); snap.width = map.width; snap.height = map.height;
+    snap.getContext("2d").drawImage(map, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ring(x, y, 11);
+    if (reduced) return;
+    const step = (t) => {
+      if (idx !== at || flashKey !== key) return;
+      const f = (t - t0) / D_MS;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(snap, 0, 0); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (f < 1) {
+        for (const off of [0, .5]) {   // two waves, half a cycle apart
+          const k = ((f * 3) + off) % 1;
+          ring(x, y, 11 + 26 * k, (1 - k) * .9);
+        }
+        ring(x, y, 11);
+        flashRaf = requestAnimationFrame(step);
+      } else { ring(x, y, 11); flashRaf = 0; }
+    };
+    flashRaf = requestAnimationFrame(step);
   }
   const about = $("about");
   const openAbout = () => { stop(); about.showModal(); };
