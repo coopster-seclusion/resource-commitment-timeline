@@ -16,7 +16,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1015'/%3E%3Cpath d='M16 5c2 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 3-6 0 3 1 4 2 4 0-4 0-7 2-11z' fill='%23ef7a22'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="assets/app.css?v=2.7c">
+<link rel="stylesheet" href="assets/app.css?v=3.0e">
 <link rel="preload" href="data/core.json" as="fetch" crossorigin>
 </head>
 <body>
@@ -67,10 +67,14 @@
     </div>
     <div class="mapwrap" id="mapwrap">
       <canvas id="map" role="img" aria-label="Map of US geographic areas coloured by preparedness level, with heat where incidents had committed personnel"></canvas>
-      <div class="pills" role="group" aria-label="Map layer">
-        <button type="button" id="m-heat" aria-pressed="true">Heat</button>
-        <button type="button" id="m-pts" aria-pressed="false">Points</button>
-        <button type="button" id="m-pl" aria-pressed="false">PL only</button>
+      <div class="maptools">
+        <div class="pills" role="group" aria-label="Map layer">
+          <button type="button" id="m-heat" aria-pressed="true">Heat</button>
+          <button type="button" id="m-pts" aria-pressed="false">Points</button>
+          <button type="button" id="m-pl" aria-pressed="false">PL only</button>
+        </div>
+        <button type="button" class="statsbtn" id="statsbtn" aria-haspopup="dialog" title="Stats: seasons, years, records">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14h12M3.5 11.5V8M6.5 11.5V4.5M9.5 11.5V6.5M12.5 11.5V2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Stats</span></button>
       </div>
       <div class="mini" id="mini" aria-hidden="true">
         <div class="mini-row"><span class="mini-date" id="miniDate">-</span><span class="mini-pl"><span class="lbl">National PL</span><span class="plchip" id="miniPl">-</span></span></div>
@@ -107,6 +111,17 @@
   </main>
 </div>
 
+<section class="stats" id="stats" hidden role="dialog" aria-modal="true" aria-labelledby="stats-h">
+  <div class="st-wrap">
+    <div class="st-head">
+      <div><h2 id="stats-h">Stats</h2><p class="st-sub">2007 to 2025 · 3,942 NICC situation reports</p></div>
+      <button class="iconbtn" id="statsclose" type="button" aria-label="Close stats">&times;</button>
+    </div>
+    <div class="st-tabs" id="statstabs" role="tablist" aria-label="Stats sections"></div>
+  </div>
+  <div class="st-body" id="statsbody"></div>
+</section>
+
 <dialog id="about" aria-labelledby="about-h">
   <div class="dlg">
     <div class="dlg-head"><h2 id="about-h">About the data</h2><button class="iconbtn" id="aboutclose" type="button" aria-label="Close">&times;</button></div>
@@ -125,6 +140,7 @@
       <p><b>Large airtankers flying</b> are federal exclusive-use large airtankers that flew that calendar day, from invoice records. The situation report stopped printing committed airtankers in May 2007, so this is activity, not commitment, and has no area breakdown.</p>
       <p><b>Callouts</b> are made from the same data: each year's busiest report by committed personnel, and the first report each year at National PL 5.</p>
       <p><b>Area tiles</b> above the map give each Geographic Area's PL and committed personnel in the report; select one to show that area's figures, select it again for national.</p>
+      <p><b>Stats</b> (the button beside the map layers) shows the same data another way: a season calendar, when each area peaks, a year-by-year review, records, the biggest incidents, and preparedness level against committed personnel. Tap an item there to open its day on the map.</p>
       <p><b>International help</b> (flags on the area tiles and in the panel, a line under the timeline) shows crews, personnel and aircraft from Australia, New Zealand, Canada and Mexico on US fires, as printed in the situation report's daily note (2008 on). The report prints no note for 2011 to 2014; those dates come from the NICC annual reports. Counts are as printed; "about N people" adds 20 per crew, the crew size the 2013 annual report gives for Canadian crews (an assumption for other crews). The annual reports sometimes give other totals or a later release date than the daily note; both are logged, not corrected.</p>
       <h3>Sources</h3>
       <ul>
@@ -152,6 +168,6 @@
 </dialog>
 <noscript><p class="noscript">This page needs JavaScript to draw the map.</p></noscript>
 <script src="vendor/d3-7.8.5.min.js"></script>
-<script src="assets/app.js?v=2.7c"></script>
+<script src="assets/app.js?v=3.0e"></script>
 </body>
 </html>

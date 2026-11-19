@@ -8,7 +8,9 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.7", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
+  const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
+  const RELEASE = { v: "3.0", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -579,7 +581,7 @@
   }
   function idxForDate(s) { const t = Date.parse(s + "T00:00:00Z") / 864e5; return isNaN(t) ? null : nearestIdx((t - T0) / (T1 - T0)); }
   window.addEventListener("hashchange", () => {
-    if (!D) return; const h = readHash();
+    if (!D || location.hash.startsWith("#stats")) return; const h = readHash();
     if (h.scope || h.scope === undefined) scope = h.scope || "NATIONAL";
     if (h.mode) setMode(h.mode);
     if (h.date) { const i = idxForDate(h.date); if (i != null) { stop(); setIdx(i); } }
@@ -692,6 +694,7 @@
   about.addEventListener("click", e => { if (e.target === about) about.close(); });
   document.addEventListener("keydown", e => {
     if (!D || about.open) return;
+    if (!$("stats").hidden) { if (e.key === "Escape") closeStats(); return; }
     if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName) && e.key !== " ") return;
     if (e.key === " " && document.activeElement.tagName !== "BUTTON") { e.preventDefault(); playing ? stop() : play(); }
     else if (e.key === "ArrowRight") { stop(); setIdx(idx + (e.shiftKey ? 30 : 1)); }
@@ -705,6 +708,44 @@
   const retheme = () => { if (!D) return; readColors(); baseKey = ""; trail = null; layoutTrack(); buildSparks(); draw(); panel(); };
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", retheme);
   new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  // ---------- stats sheet (v3.0, thesis D-240) ----------
+  // assets/stats.js loads on first use. Opening pushes a #stats/<tab> history entry, so a phone's Back button
+  // closes the sheet; jumping to the map replaces that entry with the date.
+  let statsLoad = null;
+  const loadStats = () => window.StrainStats ? Promise.resolve() : (statsLoad = statsLoad || new Promise((ok, bad) => {
+    const s = document.createElement("script"); s.src = "assets/stats.js?v=" + ASSET_V; s.onload = ok;
+    s.onerror = () => { statsLoad = null; bad(new Error("stats.js")); }; document.head.appendChild(s); }));
+  function showStats(tab, push) {
+    if (!D) return; stop();
+    loadStats().then(() => {
+      const was = !$("stats").hidden;
+      window.StrainStats.open(tab);
+      const h = "#stats/" + window.StrainStats.tab;
+      if (push && !was) history.pushState({ stats: 1 }, "", h); else history.replaceState(history.state, "", h);
+    }).catch(err => console.error("stats", err));
+  }
+  function closeStats(fromPop) {
+    if ($("stats").hidden) return;
+    window.StrainStats.close();
+    if (!fromPop && history.state && history.state.stats) history.back(); else if (!fromPop) writeHash();
+    $("statsbtn").focus({ preventScroll: true });
+  }
+  function jumpTo(i, name) {   // from the stats sheet: open report i on the map, ring the named incident
+    if (window.StrainStats) window.StrainStats.close();
+    stop(); setIdx(i);         // writeHash replaces the #stats entry with the date
+    window.scrollTo(0, 0);
+    if (name) Promise.resolve(loadYear(yOf[i])).then(() => {
+      const R = rows(idx); if (!R) return; const [Y, a, b] = R;
+      for (let k = a; k < b; k++) if (Y.names[Y.inc[k * F + C.name]] === name) { flash(k); break; }
+    });
+  }
+  $("statsbtn").onclick = () => showStats(undefined, true);
+  $("statsclose").onclick = () => closeStats();
+  window.addEventListener("popstate", () => {
+    if (location.hash.startsWith("#stats")) { if ($("stats").hidden) showStats(location.hash.split("/")[1], false); }
+    else closeStats(true);
+  });
 
   // ---------- boot ----------
   fetch("data/core.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
@@ -723,6 +764,7 @@ Created by SEC with the Claude Code`;
     MODES.forEach(k => $("m-" + k).setAttribute("aria-pressed", String(k === mode)));
     $("loading").remove(); readColors(); cardsInit(); hudInit(); layout(); panel();
     loadYear(yOf[idx]); loadReliefs();
+    if (location.hash.startsWith("#stats")) showStats(location.hash.split("/")[1], false);
     window.strainTimeline = api;
     document.dispatchEvent(new Event("strain-ready"));
   }).catch(err => { $("loading").textContent = "Could not load the data. Reload the page to try again."; console.error(err); });
@@ -736,6 +778,9 @@ Created by SEC with the Claude Code`;
       PRESENT_STEP = !!opts.trail; setIdx(i); PRESENT_STEP = false; return i;
     },
     setMode, setScope,
+    data: () => D,
+    yearData(y) { const yi = years.findIndex(Y => Y.year === y); return Promise.resolve(loadYear(yi)).then(() => years[yi]); },
+    jump: (i, name) => jumpTo(i, name),
     caption(c, alpha = 1) {   // c: {t, s, u, big} or null; alpha 0..1, set per frame by the capture script
       const el = $("cap"); if (!c || alpha <= 0) { el.innerHTML = ""; el.className = ""; el.style.opacity = 0; return; }
       el.className = c.big ? "big" : ""; el.style.opacity = alpha;
