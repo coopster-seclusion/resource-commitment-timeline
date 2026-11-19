@@ -262,6 +262,6 @@ body.present { overflow: hidden; }
   .mini-pl { display: flex; align-items: center; gap: 8px; }
   .mini-pl .lbl { font: 600 9px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
   .mini-pl .plchip { width: 30px; height: 30px; border-radius: 8px; font-size: 18px; }
-  .mini-nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; border-top: 1px solid var(--line); padding-top: 7px; }
+  .mini-nums { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; border-top: 1px solid var(--line); padding-top: 7px; }
   .present .mini { display: none; }
 }

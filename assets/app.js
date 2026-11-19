@@ -412,7 +412,7 @@
   }
 
   const HUDN = [["personnel", "Personnel"], ["crews", "Crews"], ["engines", "Engines"], ["helicopters", "Helis"], ["tank", "Airtankers"]];
-  const MININ = HUDN.slice(0, 4);   // phones, pinned map: personnel, crews, engines, helicopters
+  const MININ = HUDN;   // phones, pinned map: the same five figures as the HUD
   function hudInit() {
     $("miniNums").innerHTML = MININ.map(([k, l]) => `<div class="hn"><span class="l">${l}</span><span class="v" id="mv-${k}">-</span></div>`).join("");
     // show the strip once the HUD has (almost) scrolled out of view
@@ -430,7 +430,7 @@
     MININ.forEach(([k]) => setNum($("mv-" + k), seriesFor(k)[idx]));
     const mp = $("miniPl"); mp.textContent = np || "-"; mp.style.background = np ? plColor(np) : ""; mp.classList.toggle("pl5", np === 5);
     $("miniDate").innerHTML = `${fmtDate(D.dates[idx])}${scope === "NATIONAL" ? "" : `<small>${scope}</small>`}`;
-    $("hv-tank").previousElementSibling.textContent = scope === "NATIONAL" ? "Airtankers" : "Tankers, US";  // no area split
+    ["hv-tank", "mv-tank"].forEach(id => $(id).previousElementSibling.textContent = scope === "NATIONAL" ? "Airtankers" : "Tankers, US");  // no area split
     const ia = intlByArea();
     D.gaccs.forEach(g => {
       const pl = D.pl[g][idx], p = D.res[g].personnel[idx], b = $("gtiles").querySelector(`[data-g="${g}"]`), l = $("gl-" + g), it = ia[g];
