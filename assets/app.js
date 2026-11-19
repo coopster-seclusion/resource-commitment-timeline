@@ -8,7 +8,7 @@
   const GNAME = { NWCC: "Northwest", ONCC: "Northern California", OSCC: "Southern California", NRCC: "Northern Rockies",
     GBCC: "Great Basin", SWCC: "Southwest", RMCC: "Rocky Mountain", EACC: "Eastern Area", SACC: "Southern Area", AICC: "Alaska" };
   const MODES = ["heat", "pts", "pl"];
-  const RELEASE = { v: "2.2", date: "2026-11-19" };   // bump on each published change
+  const RELEASE = { v: "2.3", date: "2026-11-19" };   // bump on each published change
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -414,14 +414,24 @@
   const HUDN = [["personnel", "Personnel"], ["crews", "Crews"], ["engines", "Engines"], ["helicopters", "Helis"], ["tank", "Airtankers"]];
   const MININ = HUDN;   // phones, pinned map: the same five figures as the HUD
   function hudInit() {
-    $("miniNums").innerHTML = MININ.map(([k, l]) => `<div class="hn"><span class="l">${l}</span><span class="v" id="mv-${k}">-</span></div>`).join("");
+    $("miniNums").innerHTML = MININ.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="mv-${k}">-</span></button>`).join("");
     // show the strip once the HUD has (almost) scrolled out of view
     new IntersectionObserver(([e]) => $("mini").classList.toggle("on", e.intersectionRatio < .15), { threshold: [0, .15, .3] }).observe($("hud"));
-    $("hudnums").innerHTML = HUDN.map(([k, l]) => `<div class="hn"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></div>`).join("");
+    $("hudnums").innerHTML = HUDN.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></button>`).join("");
     $("gtiles").innerHTML = D.gaccs.map(g => `<button type="button" class="gt" data-g="${g}" aria-pressed="false">
       <span class="gc">${g}</span><span class="plc" id="gl-${g}">-</span>
       <span class="gp" id="gp-${g}">-</span><span class="gi" id="gf-${g}" hidden></span></button>`).join("");
+    [$("hudnums"), $("miniNums")].forEach(el => el.addEventListener("click", e => { const b = e.target.closest(".hn[data-k]"); if (b) setTrend(b.dataset.k); }));
     $("gtiles").addEventListener("click", e => { const b = e.target.closest("button[data-g]"); if (b) setScope(b.dataset.g === scope ? "NATIONAL" : b.dataset.g); });
+  }
+  // Phones: tap a figure to show its trend card above the incident list; tap it again to clear (desktop shows all cards).
+  let trend = null;
+  function setTrend(k) {
+    trend = trend === k ? null : k;
+    CARDS.forEach(c => $("c-" + c.k).classList.toggle("sel", c.k === trend));
+    $("cards").classList.toggle("has-sel", !!trend);
+    document.querySelectorAll(".hn[data-k]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === trend)));
+    requestAnimationFrame(buildSparks);   // the card was hidden, so its sparkline had no width
   }
   function hud() {
     const np = D.natpl[idx], chip = $("natplM"); chip.textContent = np || "-"; chip.style.background = np ? plColor(np) : ""; chip.classList.toggle("pl5", np === 5);
@@ -455,13 +465,17 @@
     let total = 0;
     if (R) {
       const [Y, a, b] = R, gi = D.gaccs.indexOf(scope);
-      for (let i = a; i < b; i++) { if (scope !== "NATIONAL" && Y.inc[i * F + C.gacc] !== gi) continue; total++; if (list.length < 8) list.push(i); }
-      $("inctitle").textContent = total ? `Largest of ${fmt(total)} incident${total === 1 ? "" : "s"} with personnel` : "Incidents with personnel";
-      $("inclist").innerHTML = list.length ? list.map(i => {
+      const phone = PHONE.matches, cap = phone ? (playing ? INC_SLOTS : Infinity) : 8;
+      for (let i = a; i < b; i++) { if (scope !== "NATIONAL" && Y.inc[i * F + C.gacc] !== gi) continue; total++; if (list.length < cap) list.push(i); }
+      $("inctitle").textContent = !total ? "Incidents with personnel"
+        : phone && playing && total > INC_SLOTS ? `Largest ${INC_SLOTS} of ${fmt(total)} incidents · pause for all`
+        : `Largest of ${fmt(total)} incident${total === 1 ? "" : "s"} with personnel`;
+      const pad = phone ? `<li class="slot" aria-hidden="true"><span class="nm">&nbsp;</span><span class="sub">&nbsp;</span></li>`.repeat(Math.max(0, INC_SLOTS - Math.max(1, list.length))) : "";
+      $("inclist").innerHTML = (list.length ? list.map(i => {
         const o = i * F, g = D.gaccs[Y.inc[o + C.gacc]] || "";
         return `<li tabindex="0" data-i="${i}"><span class="nm">${esc(Y.names[Y.inc[o + C.name]])}</span><span class="pp">${fmt(Y.inc[o + C.pers])}</span>
           <span class="sub"><span class="gchip">${g}</span>${fmt(Y.inc[o + C.crews])} crews &middot; ${fmt(Y.inc[o + C.eng])} eng &middot; ${fmt(Y.inc[o + C.heli])} heli</span></li>`;
-      }).join("") : `<li class="empty">No incidents with committed personnel in this report.</li>`;
+      }).join("") : `<li class="empty">No incidents with committed personnel in this report.</li>`) + pad;
     } else { $("inctitle").textContent = "Incidents with personnel"; $("inclist").innerHTML = `<li class="empty">Loading incidents.</li>`; }
     hud();
     $("scopename").textContent = scope === "NATIONAL" ? "National" : `${GNAME[scope]} (${scope})`;
@@ -517,13 +531,15 @@
   }
   function setScope(s) { scope = s; baseKey = ""; buildSparks(); draw(); panel(); writeHash(); }
   function setMode(m) { mode = m; MODES.forEach(k => $("m-" + k).setAttribute("aria-pressed", String(k === m))); trail = null; draw(); writeHash(); }
+  const PHONE = matchMedia("(max-width: 860px)"), INC_SLOTS = 5;
+  PHONE.addEventListener("change", () => { if (D) panel(); });
   const READ_MS = 5000, READ_RATE = 2;   // reports per second while a new callout is read
   let slowUntil = 0;
   function play() {
-    if (idx >= N - 1) idx = 0; playing = true; document.body.classList.add("playing"); $("play").innerHTML = "&#10074;&#10074;"; $("play").setAttribute("aria-label", "Pause");
+    if (idx >= N - 1) idx = 0; playing = true; document.body.classList.add("playing"); $("play").innerHTML = "&#10074;&#10074;"; $("play").setAttribute("aria-label", "Pause"); if (PHONE.matches) panel();
     last = performance.now(); acc = 0; requestAnimationFrame(tick);
   }
-  function stop() { if (!playing) return; playing = false; slowUntil = 0; $("callout").classList.remove("reading"); document.body.classList.remove("playing"); $("play").innerHTML = "&#9654;"; $("play").setAttribute("aria-label", "Play"); writeHash(); }
+  function stop() { if (!playing) return; playing = false; slowUntil = 0; $("callout").classList.remove("reading"); document.body.classList.remove("playing"); $("play").innerHTML = "&#9654;"; $("play").setAttribute("aria-label", "Play"); writeHash(); if (PHONE.matches) panel(); }
   function tick(t) {
     if (!playing) return;
     const sp = parseFloat($("speed").value);

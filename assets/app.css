@@ -265,3 +265,18 @@ body.present { overflow: hidden; }
   .mini-nums { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; border-top: 1px solid var(--line); padding-top: 7px; }
   .present .mini { display: none; }
 }
+/* v2.3 phones: incidents first in five fixed rows while playing; tap a figure to show its trend card above them */
+.hn { all: unset; box-sizing: border-box; display: grid; gap: 3px; min-width: 0; }
+.hn[data-k] { cursor: pointer; border-radius: 6px; padding: 3px 4px; margin: -3px -4px; -webkit-tap-highlight-color: transparent; }
+.hn[data-k] .l { text-decoration: underline dotted var(--muted); text-underline-offset: 3px; }
+.hn[aria-pressed="true"] { background: var(--chip); box-shadow: inset 0 -2px 0 var(--cursor); }
+.hn[aria-pressed="true"] .l { color: var(--ink); text-decoration-color: var(--cursor); }
+.hn:focus-visible { outline: 2px solid var(--cursor); outline-offset: 2px; }
+@media (max-width: 860px) {
+  .rail-body .cards { order: 1; } .rail-body #inctitle { order: 2; margin-top: 0; } .rail-body .inc { order: 3; }
+  .rail-body #intlwrap { order: 4; } .rail-body .foot { order: 5; }
+  .cards:not(.has-sel) { display: none; }
+  .cards .card:not(.sel) { display: none; }
+  .inc li { height: 50px; align-content: center; }   /* every row the same height, so the list never jumps */
+  .inc li.slot { cursor: default; }
+}
