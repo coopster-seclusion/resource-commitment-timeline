@@ -13,6 +13,7 @@ Checklist for the owner. Nothing here is published yet.
 | Terrain Tiles on AWS Open Data (Mapzen) | hillshade | open, attribution required | OK: attribution in the About dialog with a link to the full list |
 | d3 | code | ISC | OK, licence text kept in the minified file header |
 | Fonts | type | SIL OFL 1.1 | OK |
+| flag-icons 7.2.3 (lipis), `assets/flags/` (AU, NZ, CA, MX, 4:3 SVG) | international help flags | MIT, licence kept as `assets/flags/LICENSE-flag-icons.txt` | OK; credited in the About dialog |
 | NPS symbol library (person, group, airport) and Mapbox Maki `heliport`, inlined in `assets/app.js`; engine drawn by the author | card symbols | NPS: US government work, believed public domain [A] (repo states no licence); Maki: CC0 | OK; credited in the About dialog |
 
 ## Before the first push
@@ -21,6 +22,10 @@ Checklist for the owner. Nothing here is published yet.
 - Choose the repo name and whether the author name and thesis line in the About dialog stay as written.
 - `preview.png` (1200 x 630) and Open Graph tags: done; remake the image after visual changes.
 - Hosting: GitHub Pages from the `main` branch root (`.nojekyll` is present so files are served as is).
+
+## Each release
+
+- Bump `RELEASE` in `assets/app.js` (shown in About) and the `?v=` on the CSS and JS links in `index.html`.
 
 ## Each data update
 

@@ -16,7 +16,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1015'/%3E%3Cpath d='M16 5c2 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 3-6 0 3 1 4 2 4 0-4 0-7 2-11z' fill='%23ef7a22'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/app.css?v=2.0b">
 <link rel="preload" href="data/core.json" as="fetch" crossorigin>
 </head>
 <body>
@@ -43,15 +43,28 @@
       <div id="intlwrap" hidden><div class="sec">International help</div><ul class="intl" id="intllist"></ul></div>
       <div class="sec" id="inctitle">Largest incidents that day</div>
       <ul class="inc" id="inclist"></ul>
-      <div class="sec">Areas on this day</div>
-      <table class="areas" id="areas">
-        <thead><tr><th scope="col">Area</th><th scope="col">PL</th><th scope="col" class="num">Personnel</th></tr></thead>
-        <tbody></tbody>
-      </table>
       <p class="foot"><button class="linkbtn" id="aboutlink" type="button">About the data, sources and caveats</button></p>
     </div>
   </aside>
   <main class="stage">
+    <div class="hud" id="hud">
+      <div class="hud-top">
+        <div class="hud-row">
+          <span class="ht">Resource Commitment Timeline</span>
+          <div class="tools">
+            <button class="iconbtn" id="themeM" type="button" aria-label="Colour theme: automatic" title="Theme"></button>
+            <button class="iconbtn" id="aboutM" type="button" aria-haspopup="dialog" title="About the data">i</button>
+          </div>
+        </div>
+        <div class="hud-row">
+          <div class="date" id="dateM">Loading<small id="scopeM">&nbsp;</small></div>
+          <div class="natpl"><span class="lbl">National PL</span><div class="plchip" id="natplM">-</div></div>
+        </div>
+        <div class="hud-nums" id="hudnums"></div>
+      </div>
+      <div class="gt-head">Areas: preparedness level and committed personnel</div>
+      <div class="gtiles" id="gtiles" role="group" aria-label="Geographic areas: preparedness level and committed personnel. Select one to show that area."></div>
+    </div>
     <div class="mapwrap" id="mapwrap">
       <canvas id="map" role="img" aria-label="Map of US geographic areas coloured by preparedness level, with heat where incidents had committed personnel"></canvas>
       <div class="pills" role="group" aria-label="Map layer">
@@ -60,7 +73,6 @@
         <button type="button" id="m-pl" aria-pressed="false">PL only</button>
       </div>
       <div class="callout" id="callout" hidden aria-live="polite"></div>
-      <div id="intlmap" aria-hidden="true"></div>
       <div id="cap" aria-hidden="true"></div>
       <div class="legend" aria-hidden="true">
         <div class="t">Area preparedness level</div>
@@ -98,16 +110,17 @@
       <p><b>Personnel, crews, engines and helicopters</b> are resources committed to the incidents listed in the report, summed by reporting area. They measure commitment, not shortage or total need.</p>
       <p><b>Large airtankers flying</b> are federal exclusive-use large airtankers that flew that calendar day, from invoice records. The situation report stopped printing committed airtankers in May 2007, so this is activity, not commitment, and has no area breakdown.</p>
       <p><b>Callouts</b> are made from the same data: each year's busiest report by committed personnel, and the first report each year at National PL 5.</p>
-      <p><b>International help</b> (flags on the map and in the panel, a line under the timeline) shows crews, personnel and aircraft from Australia, New Zealand, Canada and Mexico on US fires, as printed in the situation report's daily note (2008 on). The report prints no note for 2011 to 2014; those dates come from the NICC annual reports. Counts are as printed; "about N people" adds 20 per crew, the crew size the 2013 annual report gives for Canadian crews (an assumption for other crews). The annual reports sometimes give other totals or a later release date than the daily note; both are logged, not corrected.</p>
+      <p><b>Area tiles</b> above the map give each Geographic Area's PL and committed personnel in the report; select one to show that area's figures, select it again for national.</p>
+      <p><b>International help</b> (flags on the area tiles and in the panel, a line under the timeline) shows crews, personnel and aircraft from Australia, New Zealand, Canada and Mexico on US fires, as printed in the situation report's daily note (2008 on). The report prints no note for 2011 to 2014; those dates come from the NICC annual reports. Counts are as printed; "about N people" adds 20 per crew, the crew size the 2013 annual report gives for Canadian crews (an assumption for other crews). The annual reports sometimes give other totals or a later release date than the daily note; both are logged, not corrected.</p>
       <h3>Sources</h3>
       <ul>
         <li>NICC Incident Management Situation Reports, 2007 to 2025, parsed by the author.</li>
-        <li>International help: situation report notes and NICC annual reports (2011 to 2014), compiled by the author. Flags drawn by the author.</li>
+        <li>International help: situation report notes and NICC annual reports (2011 to 2014), compiled by the author.</li>
         <li>Incident points: NIFC incident locations, matched to report incidents by the author.</li>
         <li>Airtankers: USDA Forest Service FAM Aviation Business System public reports.</li>
         <li>Geographic Area and Predictive Service Area boundaries: NIFC.</li>
         <li>Shaded relief: computed by the author from Terrain Tiles on AWS Open Data (Mapzen; sources include SRTM, GMTED2010, NED and ETOPO1; <a href="https://github.com/tilezen/joerd/blob/master/docs/attribution.md" rel="noopener">full attribution</a>).</li>
-        <li>Built with d3 (ISC licence); symbols in the National Park Service map-symbol style, from the NPS symbol library (public domain) and Mapbox Maki (CC0), engine drawn by the author; fonts Barlow Semi Condensed, Inter and JetBrains Mono (SIL Open Font Licence).</li>
+        <li>Built with d3 (ISC licence); symbols in the National Park Service map-symbol style, from the NPS symbol library (public domain) and Mapbox Maki (CC0), engine drawn by the author; flags from flag-icons by Panayiotis Lipiridis (MIT licence); fonts Barlow Semi Condensed, Inter and JetBrains Mono (SIL Open Font Licence).</li>
       </ul>
       <h3>Caveats</h3>
       <p>Counts are as printed in the reports; obvious report errors are logged, not corrected. This is research in progress for a master's thesis (MGSD) at the University of Canterbury, not an operational product.</p>
@@ -117,6 +130,6 @@
 </dialog>
 <noscript><p class="noscript">This page needs JavaScript to draw the map.</p></noscript>
 <script src="vendor/d3-7.8.5.min.js"></script>
-<script src="assets/app.js"></script>
+<script src="assets/app.js?v=2.0b"></script>
 </body>
 </html>
