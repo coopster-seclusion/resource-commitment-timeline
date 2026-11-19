@@ -20,7 +20,7 @@ Checklist for the owner. Nothing here is published yet.
 
 - Code licence: MIT (`LICENSE`), chosen 16 Nov 2026. Still to write: a one-line statement for the derived data.
 - Choose the repo name and whether the author name and thesis line in the About dialog stay as written.
-- `preview.png` (1200 x 630) and Open Graph tags: done; remake the image after visual changes.
+- `preview.png` (1200 x 630) and Open Graph tags: done; remake the image after visual changes with `node tools/preview.mjs` (site served locally).
 - Hosting: GitHub Pages from the `main` branch root (`.nojekyll` is present so files are served as is).
 
 ## Each release
