@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.4", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.5", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;

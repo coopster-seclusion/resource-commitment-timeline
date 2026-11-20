@@ -502,6 +502,9 @@ body.stats-open { overflow: hidden; }
    that starts on it still scrolls the page into the lock. */
 @media (max-width: 860px) {
   .rail { height: calc(var(--hudh, 260px) + 100lvh - 100svh); }
+  /* v3.5 (D-245): the gap follows the toolbars (dvh), so with them up the page no longer scrolls past the lock,
+     which had hidden the list header behind the timeline bar. Browsers without dvh keep the line above. */
+  .rail { height: calc(var(--hudh, 260px) + 100dvh - 100svh); }
   .app:not(.locked) .rail-body { overflow-y: hidden; }
 }
 @media (max-width: 860px) and (max-height: 760px) {
