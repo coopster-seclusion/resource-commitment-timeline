@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.6", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.7", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -109,7 +109,8 @@
     // short phones: room above the land for the pinned strip only while it shows (it shows once the top section
     // has scrolled away), and room below for the compact callout
     const stripOn = short && $("mini").classList.contains("on");
-    const pad = W < 600 ? 12 : 40, top = stripOn ? 104 : short ? 56 : W < 600 ? 52 : 64, bottom = short ? 66 : W < 860 ? 12 : 48;
+    const desk = !PHONE.matches;   // 14 px from the map foot to the overlays, 10 px clear above them
+    const pad = W < 600 ? 12 : 40, top = stripOn ? 104 : short ? 56 : W < 600 ? 52 : 64, bottom = short ? 66 : desk ? Math.max(48, overlayRoom() + 24) : W < 860 ? 12 : 48;
     proj = d3.geoAlbersUsa().fitExtent([[pad, top], [W - pad, H - bottom]], D.gacc);
     const path = d3.geoPath(proj);
     gpaths = {}; gcent = {}; landPath = new Path2D();
@@ -314,8 +315,17 @@
     const c = activeCallout(), el = $("callout");
     if (c === shownCallout) return; shownCallout = c;
     if (!c) { el.classList.remove("on"); setTimeout(() => { if (!shownCallout) el.hidden = true; }, 360); return; }
+    el.innerHTML = calloutHTML(c);
+    el.classList.remove("more");
+    el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
+    if (playing) {   // slow playback while it is read; the bar along its foot shows the time left (also under reduced motion, D-244)
+      slowUntil = performance.now() + READ_MS;
+      el.classList.remove("reading"); void el.offsetWidth; el.classList.add("reading");
+    }
+  }
+  function calloutHTML(c) {
     const y = c.date.slice(0, 4);
-    el.innerHTML = c.kind === "intl"
+    return c.kind === "intl"
       ? `<div class="ce">${y} &middot; International help arrives</div><div class="ct ci">${flags(c.p)}<span>${esc(c.what)}</span></div>
          <div class="cb">From ${provNames(c.p)} to ${destName(c.g)}, ${shortDate(c.date)}.${people(c) ? ` About ${fmt(people(c))} people.` : ""} Source: ${c.src === "IMSR" ? "NICC situation report" : esc(c.src)}.</div>`
       : c.kind === "peak"
@@ -323,12 +333,22 @@
          <div class="cb">${shortDate(c.date)}. Largest incident: <b>${esc(c.top)}</b>${c.gacc ? ` (${GNAME[c.gacc] || c.gacc})` : ""}, ${fmt(c.top_personnel)} personnel.</div>`
       : `<div class="ce">${y} &middot; National PL 5</div><div class="ct">Top preparedness level</div>
          <div class="cb">${shortDate(c.date)} is the first report of ${y} at National PL 5. ${c.personnel != null ? fmt(c.personnel) + " personnel committed." : ""}</div>`;
-    el.classList.remove("more");
-    el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
-    if (playing) {   // slow playback while it is read; the bar along its foot shows the time left (also under reduced motion, D-244)
-      slowUntil = performance.now() + READ_MS;
-      el.classList.remove("reading"); void el.offsetWidth; el.classList.add("reading");
-    }
+  }
+  // Desktop (v3.7, thesis D-250): the map is fitted above the callout and legend so neither covers land.
+  // The room kept is the tallest callout at the current width, measured once per layout, so the map never
+  // moves while callouts come and go during playback.
+  function overlayRoom() {
+    const leg = document.querySelector(".legend"), stage = document.querySelector(".stage");
+    // too narrow for the legend beside a 340 px callout: hide it, as phones do (the key is also in About)
+    stage.classList.remove("noleg");
+    const noleg = stage.clientWidth < leg.offsetWidth + 340 + 42; stage.classList.toggle("noleg", noleg);
+    stage.style.setProperty("--legw", (noleg ? 0 : leg.offsetWidth) + "px");
+    const m = $("callout").cloneNode(false);
+    m.removeAttribute("id"); m.removeAttribute("aria-live"); m.hidden = false; m.className = "callout measure";
+    stage.appendChild(m);
+    let tall = 0; for (const c of D.callouts) { m.innerHTML = calloutHTML(c); tall = Math.max(tall, m.offsetHeight); }
+    m.remove();
+    return Math.max(noleg ? 0 : leg.offsetHeight, tall);
   }
 
   // ---------- panel ----------

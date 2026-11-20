@@ -124,6 +124,9 @@ h1 { margin: 0; font: 800 28px/1.02 var(--f-display); letter-spacing: .005em; te
 .legend .t { font: 600 10px/1 var(--f-display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .callout { position: absolute; left: 14px; bottom: calc(var(--scrubh, 67px) + 14px); max-width: min(340px, calc(100% - 28px)); background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--cursor); border-radius: 10px; padding: 12px 14px; box-shadow: var(--shadow); z-index: 3; opacity: 0; transform: translateY(6px); transition: opacity .35s, transform .35s; }
 .callout.on { opacity: 1; transform: none; }
+.callout.measure { visibility: hidden; transition: none; pointer-events: none; }
+/* Desktop (v3.7, D-250): the callout may widen into the room left of the legend, so long ones take fewer lines. */
+@media (min-width: 861px) { .stage.noleg .legend { display: none; } .callout { max-width: min(520px, max(340px, calc(100% - var(--legw, 220px) - 42px))); } }
 .callout .ce { font: 600 10px/1 var(--f-display); letter-spacing: .14em; text-transform: uppercase; color: var(--cursor); }
 .callout .ct { font: 800 22px/1.1 var(--f-display); margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
 .callout .cb { font-size: 12px; line-height: 1.45; color: var(--ink2); }
