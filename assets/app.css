@@ -80,6 +80,8 @@ h1 { margin: 0; font: 800 28px/1.02 var(--f-display); letter-spacing: .005em; te
 .plc { display: inline-grid; place-items: center; width: 20px; height: 16px; border-radius: 4px; font: 700 11px/1 var(--f-display); color: #fff; }
 .plc.none { color: var(--muted); background: transparent; border: 1px solid var(--line); }
 .foot { margin: 8px 0 0; }
+.foot .wxwrap { display: block; margin-top: 8px; }
+.foot .wxwrap[hidden] { display: none; }
 .linkbtn { background: none; border: 0; padding: 0; color: var(--ink2); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: 12px; }
 
 .stage { position: relative; min-width: 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; background: var(--bg); }

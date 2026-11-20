@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.8", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.9", date: "2026-11-21", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -809,6 +809,10 @@
     const home = $("homelnk"); home.href = "/"; home.removeAttribute("target"); home.removeAttribute("rel");
     const eb = $("eyebrow"), a = document.createElement("a"); a.href = "/"; a.textContent = "wildfireLINE";
     eb.replaceChildren(a, document.createTextNode(" · 2007 to 2025"));
+    // v3.9 (thesis D-258): the fire weather view for the date and area on screen; that page opens the area's most
+    // severe PSA for the day when given a Geographic Area
+    $("wxwrap").hidden = false;
+    $("wxlink").addEventListener("click", () => { if (D) $("wxlink").href = `/weather/#${D.dates[idx]}${scope === "NATIONAL" ? "" : "/" + scope}`; });
   }
 
   // ---------- boot ----------
