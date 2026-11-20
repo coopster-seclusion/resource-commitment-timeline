@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.3", date: "2026-11-19", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.4", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -325,7 +325,7 @@
          <div class="cb">${shortDate(c.date)} is the first report of ${y} at National PL 5. ${c.personnel != null ? fmt(c.personnel) + " personnel committed." : ""}</div>`;
     el.classList.remove("more");
     el.hidden = false; requestAnimationFrame(() => el.classList.add("on"));
-    if (playing && !reduced) {   // slow playback while it is read; the bar along its foot shows the time left
+    if (playing) {   // slow playback while it is read; the bar along its foot shows the time left (also under reduced motion, D-244)
       slowUntil = performance.now() + READ_MS;
       el.classList.remove("reading"); void el.offsetWidth; el.classList.add("reading");
     }
@@ -438,7 +438,8 @@
       document.querySelector(".stage").classList.toggle("pinned", on);
       placePinned();
       if (on !== was && SHORT.matches && D) layout();   // refit the map around the strip (D-241)
-    }, { threshold: [0, .15, .3] }).observe($("hud"));
+      document.querySelector(".app").classList.toggle("locked", e.intersectionRatio < .02);   // HUD fully away: the list scrolls (D-244)
+    }, { threshold: [0, .02, .15, .3] }).observe($("hud"));
     $("hudnums").innerHTML = HUDN.map(([k, l]) => `<button type="button" class="hn" data-k="${k}" aria-pressed="false" title="Show the ${l.toLowerCase()} trend"><span class="l">${l}</span><span class="v" id="hv-${k}">-</span></button>`).join("");
     $("gtiles").innerHTML = D.gaccs.map(g => `<button type="button" class="gt" data-g="${g}" aria-pressed="false">
       <span class="gc">${g}</span><span class="plc" id="gl-${g}">-</span>
@@ -669,7 +670,8 @@
   // a tap or click also rings the incident (not every touch browser sends a mouseover on tap)
   $("inclist").addEventListener("click", e => { const li = e.target.closest("li[data-i]"); if (li) flash(+li.dataset.i); });
   // Incident ring (v2.7): dark halo, white ring, sky-blue dashes on top, so it reads on bright heat and on pale land.
-  // A new pick pulses outward for about 1.5 s, then the ring stays. No pulse under reduced motion.
+  // A new pick pulses outward for about 1.5 s, then the ring stays. Under reduced motion (D-244) the rings do not
+  // grow: a still glow behind the ring fades out over the same 1.5 s instead.
   const RING = { halo: "rgba(5, 7, 10, .8)", white: "#ffffff", blue: "#38bdf8" };
   let flashRaf = 0, flashKey = "", picked = null;
   function ring(x, y, r, a = 1) {
@@ -691,12 +693,16 @@
     const snap = document.createElement("canvas"); snap.width = map.width; snap.height = map.height;
     snap.getContext("2d").drawImage(map, 0, 0);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ring(x, y, 11);
-    if (reduced) return;
     const step = (t) => {
       if (idx !== at || flashKey !== key) return;
       const f = (t - t0) / D_MS;
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(snap, 0, 0); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (f < 1) {
+      if (f < 1 && reduced) {
+        ctx.save(); ctx.globalAlpha = .55 * (1 - f); ctx.fillStyle = RING.blue;
+        ctx.beginPath(); ctx.arc(x, y, 24, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        ring(x, y, 11);
+        flashRaf = requestAnimationFrame(step);
+      } else if (f < 1) {
         for (const off of [0, .5]) {   // two waves, half a cycle apart
           const k = ((f * 3) + off) % 1;
           ring(x, y, 11 + 26 * k, (1 - k) * .9);
