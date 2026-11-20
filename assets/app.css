@@ -105,6 +105,9 @@ h1 { margin: 0; font: 800 28px/1.02 var(--f-display); letter-spacing: .005em; te
 .gt .gc { font: 700 11px/1 var(--f-display); letter-spacing: .05em; color: var(--ink2); min-width: 0; overflow: hidden; }
 .gt .gi { grid-column: 1 / -1; display: flex; align-items: center; gap: 3px; font: 700 11px/1 var(--f-display); color: var(--cursor); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; }
 .gt .gi[hidden] { display: none; }
+/* Desktop (v3.8, D-252): an empty flag row keeps its height, so tiles, and with them the map box, stay one size;
+   before, international-help days added a row and the map refitted (a visible jump during playback). */
+@media (min-width: 861px) { .gt .gi { min-height: 11.25px; } .gt .gi[hidden] { display: flex; visibility: hidden; } }
 .gt .gi span { margin-left: 1px; }
 .gt .flag { width: 15px; height: 11.25px; flex: none; }
 .gt .plc { width: 18px; height: 15px; font-size: 10px; }
