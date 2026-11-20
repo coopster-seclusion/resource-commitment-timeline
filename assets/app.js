@@ -13,7 +13,7 @@
   const SHORT = matchMedia("(max-width: 860px) and (max-height: 760px)");
   // stats.js gets the same cache tag as this file (index.html sets ?v= on app.js and app.css)
   const ASSET_V = ((document.currentScript && document.currentScript.src) || "").split("?v=")[1] || "0";
-  const RELEASE = { v: "3.5", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
+  const RELEASE = { v: "3.6", date: "2026-11-20", first: "2026-11-16" };   // bump v and date on each published change; first = first public release (thesis D-213)
   const params = new URLSearchParams(location.search);
   const PRESENT = params.has("present");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -782,6 +782,14 @@
     if (location.hash.startsWith("#stats")) { if ($("stats").hidden) showStats(location.hash.split("/")[1], false); }
     else closeStats(true);
   });
+
+  // ---------- served inside wildfireline.org ----------
+  // wildfireline.org mirrors this site at /commitment/ (thesis D-249); there, the header and About link lead back to the site home in the same tab.
+  if (location.pathname.startsWith("/commitment/")) {
+    const home = $("homelnk"); home.href = "/"; home.removeAttribute("target"); home.removeAttribute("rel");
+    const eb = $("eyebrow"), a = document.createElement("a"); a.href = "/"; a.textContent = "wildfireLINE";
+    eb.replaceChildren(a, document.createTextNode(" · 2007 to 2025"));
+  }
 
   // ---------- boot ----------
   fetch("data/core.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {

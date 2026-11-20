@@ -16,7 +16,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1015'/%3E%3Cpath d='M16 5c2 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 3-6 0 3 1 4 2 4 0-4 0-7 2-11z' fill='%23ef7a22'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="assets/app.css?v=3.5">
+<link rel="stylesheet" href="assets/app.css?v=3.6">
 <link rel="preload" href="data/core.json" as="fetch" crossorigin>
 </head>
 <body>
@@ -24,7 +24,7 @@
   <aside class="rail" aria-label="Resources for the selected day">
     <div class="rail-head">
       <div class="toprow">
-        <div class="eyebrow">US wildfire &middot; 2007 to 2025</div>
+        <div class="eyebrow" id="eyebrow">US wildfire &middot; 2007 to 2025</div>
         <div class="tools">
           <button class="iconbtn" id="theme" type="button" aria-label="Colour theme: automatic" title="Theme"></button>
           <button class="iconbtn" id="aboutbtn" type="button" aria-haspopup="dialog" title="About the data">i</button>
@@ -156,6 +156,9 @@
       <h3>Caveats</h3>
       <p>Counts are as printed in the reports; obvious report errors are logged, not corrected. This is research in progress for a master's thesis (MGSD) at the University of Canterbury, not an operational product.</p>
       <div class="links">
+        <a class="lnk" id="homelnk" href="https://www.wildfireline.org/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0d1015"/><path d="M16 5c2 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 3-6 0 3 1 4 2 4 0-4 0-7 2-11z" fill="#ef7a22"/></svg>
+          <span>wildfireLINE</span></a>
         <a class="lnk" href="https://www.linkedin.com/in/steven-cooper-tech/" target="_blank" rel="noopener">
           <svg class="li" viewBox="0 0 20 20" aria-hidden="true"><rect width="20" height="20" rx="4" fill="#0A66C2"/><text x="10" y="15" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="13" fill="#fff">in</text></svg>
           <span>LinkedIn</span></a>
@@ -169,6 +172,6 @@
 </dialog>
 <noscript><p class="noscript">This page needs JavaScript to draw the map.</p></noscript>
 <script src="vendor/d3-7.8.5.min.js"></script>
-<script src="assets/app.js?v=3.5"></script>
+<script src="assets/app.js?v=3.6"></script>
 </body>
 </html>

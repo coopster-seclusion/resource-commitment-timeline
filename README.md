@@ -25,7 +25,7 @@ Static site. No build step, no server code, no analytics, no third-party request
 
 ## Releases
 
-v2.0 to v3.3 were released on 19 Nov 2026 and v3.4 and v3.5 on 20 Nov 2026 (first release 16 Nov 2026); what each changed is in the commit log and in the thesis repo `DECISIONS.md` (D-231 to D-245). v3.1 added a short-screen mode for phones under 760 px of page height (iPhone SE size); `tools/phone_shots.mjs` checks six phone sizes, locally or on the live site with `SITE=`.
+v2.0 to v3.3 were released on 19 Nov 2026 and v3.4 to v3.6 on 20 Nov 2026 (first release 16 Nov 2026); what each changed is in the commit log and in the thesis repo `DECISIONS.md` (D-231 to D-249). v3.1 added a short-screen mode for phones under 760 px of page height (iPhone SE size); `tools/phone_shots.mjs` checks six phone sizes, locally or on the live site with `SITE=`.
 
 ## Rebuilding the data
 
@@ -50,3 +50,7 @@ then open http://localhost:8737. Opening `index.html` as a file does not work (t
 The URL hash holds the view: `#2008-07-14`, `#2021-08-14/ONCC`, `#2012-08-16/pl` (modes: heat, pts, pl). `#stats/seasons`, `#stats/years`, `#stats/records`, `#stats/thesis` open the Stats sheet on that tab; on a phone, Back closes it. `?theme=light` or `?theme=dark` forces a theme. `?present` hides controls for screen capture; `window.strainTimeline.go(date, {trail: true})` steps the map for scripted capture.
 
 See `PUBLISHING.md` before making the repo public.
+
+## On wildfireline.org
+
+wildfireline.org mirrors this site live at `/commitment/` (a Vercel rewrite to this GitHub Pages site, thesis D-249), so work and releases stay here: each push shows there too. When the page is served from a `/commitment/` path, the header eyebrow and the About button link back to the wildfireLINE home in the same tab (v3.6). Keep asset and data paths relative so the mirror keeps working.
